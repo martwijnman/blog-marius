@@ -6,10 +6,13 @@ import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
 import { defineConfig } from 'vite';
 
+const hasPhp = !process.env.VERCEL && !process.env.CI;
+
 export default defineConfig({
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
+            ssr: 'resources/js/ssr.tsx',
             refresh: true,
             fonts: [
                 bunny('Instrument Sans', {
@@ -24,8 +27,6 @@ export default defineConfig({
             },
         }),
         tailwindcss(),
-        wayfinder({
-            formVariants: true,
-        }),
+        ...(hasPhp ? [wayfinder({ formVariants: true })] : []),
     ],
 });
