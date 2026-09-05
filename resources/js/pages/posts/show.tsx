@@ -41,6 +41,16 @@ type PostComment = {
     created_at: string | null;
 };
 
+function getDevice() {
+    const agent = navigator.userAgent;
+
+    if (/iPad|Tablet|PlayBook|Silk/i.test(agent)) {
+        return 'Tablet';
+    }
+
+    return /Mobi|Android|iPhone|iPod/i.test(agent) ? 'Mobile' : 'Desktop';
+}
+
 function getImageSrc(path: string) {
     if (path.startsWith('http') || path.startsWith('/')) {
         return path;
@@ -113,6 +123,16 @@ export default function ShowPostPage({ post }: Props) {
             }
         }
 
+        const openedAt = Date.now();
+
+        function visit(readSeconds: number) {
+            return {
+                referrer: document.referrer || null,
+                device: getDevice(),
+                read_seconds: readSeconds,
+            };
+        }
+
         async function registerView() {
             await fetch(`/api/posts/${post.id}/view`, {
                 method: 'POST',
@@ -121,14 +141,47 @@ export default function ShowPostPage({ post }: Props) {
                     Accept: 'application/json',
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ referrer: document.referrer || null }),
+                body: JSON.stringify(visit(0)),
             });
         }
+
+        // Report how long the reader stayed. sendBeacon survives the page being
+        // closed, which a regular fetch does not.
+        function reportReadTime() {
+            const readSeconds = Math.round((Date.now() - openedAt) / 1000);
+
+            if (readSeconds < 1) {
+                return;
+            }
+
+            navigator.sendBeacon?.(
+                `/api/posts/${post.id}/view`,
+                new Blob([JSON.stringify(visit(readSeconds))], {
+                    type: 'application/json',
+                }),
+            );
+        }
+
+        function handleVisibilityChange() {
+            if (document.visibilityState === 'hidden') {
+                reportReadTime();
+            }
+        }
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
 
         void loadImages();
         void loadComments();
         void loadLikes();
         void registerView();
+
+        return () => {
+            document.removeEventListener(
+                'visibilitychange',
+                handleVisibilityChange,
+            );
+            reportReadTime();
+        };
     }, [post.id]);
 
     async function toggleLike() {

@@ -367,7 +367,7 @@ posts_archive.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => (
     
     posts_archive.form = posts_archiveForm
 /**
- * @see routes/web.php:10
+ * @see routes/web.php:11
  * @route '/posts/{post}'
  */
 export const posts_show_public = (args: { post: number | { id: number } } | [post: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -381,7 +381,7 @@ posts_show_public.definition = {
 } satisfies RouteDefinition<["get","head"]>
 
 /**
- * @see routes/web.php:10
+ * @see routes/web.php:11
  * @route '/posts/{post}'
  */
 posts_show_public.url = (args: { post: number | { id: number } } | [post: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -413,7 +413,7 @@ posts_show_public.url = (args: { post: number | { id: number } } | [post: number
 }
 
 /**
- * @see routes/web.php:10
+ * @see routes/web.php:11
  * @route '/posts/{post}'
  */
 posts_show_public.get = (args: { post: number | { id: number } } | [post: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -421,7 +421,7 @@ posts_show_public.get = (args: { post: number | { id: number } } | [post: number
     method: 'get',
 })
 /**
- * @see routes/web.php:10
+ * @see routes/web.php:11
  * @route '/posts/{post}'
  */
 posts_show_public.head = (args: { post: number | { id: number } } | [post: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -430,7 +430,7 @@ posts_show_public.head = (args: { post: number | { id: number } } | [post: numbe
 })
 
     /**
- * @see routes/web.php:10
+ * @see routes/web.php:11
  * @route '/posts/{post}'
  */
     const posts_show_publicForm = (args: { post: number | { id: number } } | [post: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -439,7 +439,7 @@ posts_show_public.head = (args: { post: number | { id: number } } | [post: numbe
     })
 
             /**
- * @see routes/web.php:10
+ * @see routes/web.php:11
  * @route '/posts/{post}'
  */
         posts_show_publicForm.get = (args: { post: number | { id: number } } | [post: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -447,7 +447,7 @@ posts_show_public.head = (args: { post: number | { id: number } } | [post: numbe
             method: 'get',
         })
             /**
- * @see routes/web.php:10
+ * @see routes/web.php:11
  * @route '/posts/{post}'
  */
         posts_show_publicForm.head = (args: { post: number | { id: number } } | [post: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -728,8 +728,8 @@ analystics.options = (options?: RouteQueryOptions): RouteDefinition<'options'> =
     
     analystics.form = analysticsForm
 /**
-* @see \Inertia\Controller::__invoke
- * @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\AnalyticsController::analytics
+ * @see app/Http/Controllers/AnalyticsController.php:27
  * @route '/analytics'
  */
 export const analytics = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -743,8 +743,8 @@ analytics.definition = {
 } satisfies RouteDefinition<["get","head"]>
 
 /**
-* @see \Inertia\Controller::__invoke
- * @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\AnalyticsController::analytics
+ * @see app/Http/Controllers/AnalyticsController.php:27
  * @route '/analytics'
  */
 analytics.url = (options?: RouteQueryOptions) => {
@@ -752,8 +752,8 @@ analytics.url = (options?: RouteQueryOptions) => {
 }
 
 /**
-* @see \Inertia\Controller::__invoke
- * @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\AnalyticsController::analytics
+ * @see app/Http/Controllers/AnalyticsController.php:27
  * @route '/analytics'
  */
 analytics.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -761,8 +761,8 @@ analytics.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     method: 'get',
 })
 /**
-* @see \Inertia\Controller::__invoke
- * @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\AnalyticsController::analytics
+ * @see app/Http/Controllers/AnalyticsController.php:27
  * @route '/analytics'
  */
 analytics.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -771,8 +771,8 @@ analytics.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 })
 
     /**
-* @see \Inertia\Controller::__invoke
- * @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\AnalyticsController::analytics
+ * @see app/Http/Controllers/AnalyticsController.php:27
  * @route '/analytics'
  */
     const analyticsForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -781,8 +781,8 @@ analytics.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     })
 
             /**
-* @see \Inertia\Controller::__invoke
- * @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\AnalyticsController::analytics
+ * @see app/Http/Controllers/AnalyticsController.php:27
  * @route '/analytics'
  */
         analyticsForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -790,8 +790,8 @@ analytics.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
             method: 'get',
         })
             /**
-* @see \Inertia\Controller::__invoke
- * @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
+* @see \App\Http\Controllers\AnalyticsController::analytics
+ * @see app/Http/Controllers/AnalyticsController.php:27
  * @route '/analytics'
  */
         analyticsForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

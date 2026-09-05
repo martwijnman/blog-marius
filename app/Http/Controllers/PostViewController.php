@@ -42,7 +42,7 @@ class PostViewController extends Controller
                     'visitor_id' => $visitorId,
                 ],
                 [
-                    'country_code' => $request->header('CF-IPCountry'),
+                    'country_code' => $this->countryCode($request),
                     'device' => $data['device'] ?? null,
                     'referrer' => $data['referrer'] ?? null,
                     'read_seconds' => $data['read_seconds'] ?? 0,
@@ -50,6 +50,17 @@ class PostViewController extends Controller
             );
 
             $shouldIncrementViews = $view->wasRecentlyCreated;
+
+            // The page pings again when the reader leaves, to report how long
+            // they stayed. Keep the longest visit of the day.
+            if (! $view->wasRecentlyCreated) {
+                $view->fill([
+                    'country_code' => $view->country_code ?: $this->countryCode($request),
+                    'device' => $view->device ?: ($data['device'] ?? null),
+                    'referrer' => $view->referrer ?: ($data['referrer'] ?? null),
+                    'read_seconds' => max((int) $view->read_seconds, (int) ($data['read_seconds'] ?? 0)),
+                ])->save();
+            }
         } catch (QueryException) {
             // Keep counting the view when the legacy post_views foreign key is invalid.
         }
@@ -63,5 +74,19 @@ class PostViewController extends Controller
         }
 
         return response()->noContent();
+    }
+
+    /**
+     * Country of the visitor, as reported by whichever edge proxy is in front
+     * of the app. Null in local development — there is no proxy to ask.
+     */
+    private function countryCode(Request $request): ?string
+    {
+        $code = $request->header('CF-IPCountry')
+            ?? $request->header('X-Vercel-IP-Country');
+
+        return $code && strlen($code) === 2 && $code !== 'XX'
+            ? strtoupper($code)
+            : null;
     }
 }

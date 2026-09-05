@@ -236,84 +236,6 @@ Controller42a740574ecbfbac32f8cc353fc32db9.head = (options?: RouteQueryOptions):
     /**
 * @see \Inertia\Controller::__invoke
  * @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
- * @route '/analytics'
- */
-const Controller31267796ba3c3b8ba7984e9dd432498b = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
-    url: Controller31267796ba3c3b8ba7984e9dd432498b.url(options),
-    method: 'get',
-})
-
-Controller31267796ba3c3b8ba7984e9dd432498b.definition = {
-    methods: ["get","head"],
-    url: '/analytics',
-} satisfies RouteDefinition<["get","head"]>
-
-/**
-* @see \Inertia\Controller::__invoke
- * @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
- * @route '/analytics'
- */
-Controller31267796ba3c3b8ba7984e9dd432498b.url = (options?: RouteQueryOptions) => {
-    return Controller31267796ba3c3b8ba7984e9dd432498b.definition.url + queryParams(options)
-}
-
-/**
-* @see \Inertia\Controller::__invoke
- * @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
- * @route '/analytics'
- */
-Controller31267796ba3c3b8ba7984e9dd432498b.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
-    url: Controller31267796ba3c3b8ba7984e9dd432498b.url(options),
-    method: 'get',
-})
-/**
-* @see \Inertia\Controller::__invoke
- * @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
- * @route '/analytics'
- */
-Controller31267796ba3c3b8ba7984e9dd432498b.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
-    url: Controller31267796ba3c3b8ba7984e9dd432498b.url(options),
-    method: 'head',
-})
-
-    /**
-* @see \Inertia\Controller::__invoke
- * @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
- * @route '/analytics'
- */
-    const Controller31267796ba3c3b8ba7984e9dd432498bForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-        action: Controller31267796ba3c3b8ba7984e9dd432498b.url(options),
-        method: 'get',
-    })
-
-            /**
-* @see \Inertia\Controller::__invoke
- * @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
- * @route '/analytics'
- */
-        Controller31267796ba3c3b8ba7984e9dd432498bForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: Controller31267796ba3c3b8ba7984e9dd432498b.url(options),
-            method: 'get',
-        })
-            /**
-* @see \Inertia\Controller::__invoke
- * @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
- * @route '/analytics'
- */
-        Controller31267796ba3c3b8ba7984e9dd432498bForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: Controller31267796ba3c3b8ba7984e9dd432498b.url({
-                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                            _method: 'HEAD',
-                            ...(options?.query ?? options?.mergeQuery ?? {}),
-                        }
-                    }),
-            method: 'get',
-        })
-    
-    Controller31267796ba3c3b8ba7984e9dd432498b.form = Controller31267796ba3c3b8ba7984e9dd432498bForm
-    /**
-* @see \Inertia\Controller::__invoke
- * @see vendor/inertiajs/inertia-laravel/src/Controller.php:13
  * @route '/settings/appearance'
  */
 const Controllere19ee86e9cf603ce1a59a1ec5d21dec5 = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -399,7 +321,6 @@ const Controller = {
     '/': Controller980bb49ee7ae63891f1d891d2fbcf1c9,
     '/archive': Controller3c5e972c0fe6e2605867a1ef551e98b2,
     '/dashboard': Controller42a740574ecbfbac32f8cc353fc32db9,
-    '/analytics': Controller31267796ba3c3b8ba7984e9dd432498b,
     '/settings/appearance': Controllere19ee86e9cf603ce1a59a1ec5d21dec5,
 }
 

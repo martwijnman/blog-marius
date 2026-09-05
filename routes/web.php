@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnalyticsController;
 use App\Models\Post;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -16,7 +17,7 @@ Route::get('/posts/{post}', function (Post $post) {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
     Route::redirect('analystics', 'analytics')->name('analystics');
-    Route::inertia('analytics', 'analytics')->name('analytics');
+    Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics');
 });
 
 require __DIR__.'/settings.php';

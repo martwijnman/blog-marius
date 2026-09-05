@@ -505,20 +505,22 @@ export default function Dashboard() {
                                 />
 
                                 <Button
+                                    variant="white"
                                     onClick={() => void applyBulkAction()}
                                     disabled={bulkAction === ''}
                                     loading={isBulkRunning}
                                     color={
                                         bulkAction === 'delete'
                                             ? 'red'
-                                            : undefined
+                                            : 'dark'
                                     }
                                 >
                                     Apply
                                 </Button>
 
                                 <Button
-                                    variant="subtle"
+                                    variant="white"
+                                    color="dark"
                                     onClick={() => {
                                         setSelectedPosts([]);
                                         setBulkAction('');
@@ -713,12 +715,14 @@ export default function Dashboard() {
                                                     />
                                                     <FaFile
                                                         size={14}
+                                                        className="cursor-pointer text-white"
                                                         onClick={() =>
                                                             setReaderPost(post)
                                                         }
                                                     />
                                                     <FaTrash
                                                         size={14}
+                                                        className="cursor-pointer text-white"
                                                         onClick={() =>
                                                             void deletePost(
                                                                 post,
@@ -784,6 +788,10 @@ export default function Dashboard() {
                                     total={totalPages}
                                     value={currentPage}
                                     onChange={setActivePage}
+                                    classNames={{
+                                        control:
+                                            'data-[active]:!border-neutral-950 data-[active]:!bg-neutral-950 data-[active]:!text-white dark:data-[active]:!border-neutral-100 dark:data-[active]:!bg-neutral-100 dark:data-[active]:!text-neutral-950',
+                                    }}
                                 />
                             </div>
                         )}

@@ -1,19 +1,21 @@
-type Marker = {
-    city: string;
-    value: number;
-    x: number;
-    y: number;
+export type CountryMarker = {
+    name: string;
+    views: number;
+    /** Position on the map box, in percentages. Null for unmapped countries. */
+    x: number | null;
+    y: number | null;
 };
 
-const markers: Marker[] = [
-    { city: 'Amsterdam', value: 42, x: 51, y: 32 },
-    { city: 'New York', value: 27, x: 28, y: 39 },
-    { city: 'Singapore', value: 18, x: 75, y: 58 },
-    { city: 'Sao Paulo', value: 12, x: 39, y: 70 },
-];
+type Props = {
+    markers?: CountryMarker[];
+};
 
-export default function WorldMap() {
-    const total = markers.reduce((sum, marker) => sum + marker.value, 0);
+export default function WorldMap({ markers = [] }: Props) {
+    const total = markers.reduce((sum, marker) => sum + marker.views, 0);
+    const plotted = markers.filter(
+        (marker): marker is CountryMarker & { x: number; y: number } =>
+            marker.x !== null && marker.y !== null,
+    );
 
     return (
         <div className="w-full overflow-hidden border border-neutral-200 bg-white text-neutral-950 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-100">
@@ -72,9 +74,10 @@ export default function WorldMap() {
                     />
                 </svg>
 
-                {markers.map((marker) => (
+                {plotted.map((marker) => (
                     <div
-                        key={marker.city}
+                        key={marker.name}
+                        title={`${marker.name}: ${marker.views}`}
                         className="absolute -translate-x-1/2 -translate-y-1/2"
                         style={{ left: `${marker.x}%`, top: `${marker.y}%` }}
                     >
@@ -86,17 +89,24 @@ export default function WorldMap() {
                 ))}
             </div>
 
-            <div className="grid grid-cols-2 border-t border-neutral-200 dark:border-neutral-800 sm:grid-cols-4">
-                {markers.map((marker) => (
-                    <div
-                        key={marker.city}
-                        className="border-b border-r border-neutral-200 p-3 last:border-r-0 dark:border-neutral-800 sm:border-b-0"
-                    >
-                        <p className="truncate text-sm font-medium">{marker.city}</p>
-                        <p className="mt-1 text-xs text-neutral-500">{marker.value} readers</p>
-                    </div>
-                ))}
-            </div>
+            {markers.length > 0 ? (
+                <div className="grid grid-cols-2 border-t border-neutral-200 dark:border-neutral-800 sm:grid-cols-4">
+                    {markers.slice(0, 4).map((marker) => (
+                        <div
+                            key={marker.name}
+                            className="border-b border-r border-neutral-200 p-3 last:border-r-0 dark:border-neutral-800 sm:border-b-0"
+                        >
+                            <p className="truncate text-sm font-medium">{marker.name}</p>
+                            <p className="mt-1 text-xs text-neutral-500">{marker.views} readers</p>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <p className="border-t border-neutral-200 p-4 text-xs text-neutral-500 dark:border-neutral-800">
+                    No location data yet. Countries are read from the edge proxy
+                    (Cloudflare or Vercel), so they stay empty in local development.
+                </p>
+            )}
         </div>
     );
 }
