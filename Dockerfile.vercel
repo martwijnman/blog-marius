@@ -59,22 +59,34 @@ RUN composer dump-autoload --no-dev --optimize --classmap-authoritative
 # (zie vite.config.ts); de gegenereerde routes staan in git.
 RUN npm run build
 
-# SQLite-database aanmaken en migreren tijdens de build.
-# database/database.sqlite staat in .gitignore, dus zonder deze stap
-# bestaat het bestand niet in de image en crasht elke request met een 500.
-# De APP_KEY hier is alleen voor de build; runtime gebruikt de env var van Vercel.
+# SQLite-database in de image bouwen.
+# database/database.sqlite staat in .gitignore en .dockerignore, dus zonder
+# deze stap bestaat het bestand niet in de container en crasht elke request
+# met een 500 zodra Laravel de session/cache store opent.
+#
+# Deze env-waarden gelden ALLEEN in de build-stage; de runtime-stage begint
+# opnieuw vanaf `base` en gebruikt de env vars uit Vercel.
+ENV APP_ENV=production \
+    APP_DEBUG=false \
+    APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= \
+    DB_CONNECTION=sqlite \
+    DB_DATABASE=/app/database/database.sqlite \
+    SESSION_DRIVER=file \
+    CACHE_STORE=file \
+    QUEUE_CONNECTION=sync \
+    LOG_CHANNEL=stderr
+
+# Alleen CategorySeeder draaien: DatabaseSeeder roept User::factory() aan en
+# dus fake(), en fakerphp/faker zit in require-dev - die bestaat niet in deze
+# --no-dev build.
 RUN mkdir -p database \
     && touch database/database.sqlite \
-    && APP_ENV=production \
-       APP_DEBUG=false \
-       APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= \
-       DB_CONNECTION=sqlite \
-       DB_DATABASE=/app/database/database.sqlite \
-       SESSION_DRIVER=file \
-       CACHE_STORE=file \
-       QUEUE_CONNECTION=sync \
-       LOG_CHANNEL=stderr \
-       php artisan migrate --force --seed
+    && php artisan migrate --force \
+    && php artisan db:seed --force --class="Database\\Seeders\\CategorySeeder"
+
+# public/storage -> storage/app/public, anders geeft elke ge-uploade
+# afbeelding een 404.
+RUN php artisan storage:link --force
 
 
 # ---------- RUNTIME ----------
