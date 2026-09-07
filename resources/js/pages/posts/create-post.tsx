@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/sheet';
 import type { Category } from '@/lib/blog';
 import type { Post } from '../dashboard';
-import { uploadImages } from './upload-images';
+import { mergeFiles, uploadImages } from './upload-images';
 
 type PostForm = Pick<
     Post,
@@ -80,7 +80,20 @@ export default function CreatePost({ onSaved, categories }: Props) {
 
         setForm((current) => ({
             ...current,
-            images: Array.from(files),
+            images: mergeFiles(current.images, files),
+        }));
+
+        // Leegmaken, anders vuurt change niet als je hetzelfde bestand
+        // nogmaals kiest.
+        event.currentTarget.value = '';
+    };
+
+    const removeImage = (key: string) => {
+        setForm((current) => ({
+            ...current,
+            images: current.images.filter(
+                (image) => `${image.name}-${image.lastModified}` !== key,
+            ),
         }));
     };
 
@@ -292,12 +305,26 @@ export default function CreatePost({ onSaved, categories }: Props) {
                             {previews.length > 0 && (
                                 <div className="grid grid-cols-6 gap-2">
                                     {previews.map((preview) => (
-                                        <img
+                                        <div
                                             key={preview.key}
-                                            src={preview.url}
-                                            alt={preview.name}
-                                            className="aspect-square w-full rounded-md object-cover"
-                                        />
+                                            className="relative"
+                                        >
+                                            <img
+                                                src={preview.url}
+                                                alt={preview.name}
+                                                className="aspect-square w-full rounded-md object-cover"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    removeImage(preview.key)
+                                                }
+                                                className="absolute -top-1 -right-1 rounded-full bg-foreground/80 px-1.5 text-xs leading-5 text-background"
+                                                aria-label={`Remove ${preview.name}`}
+                                            >
+                                                x
+                                            </button>
+                                        </div>
                                     ))}
                                 </div>
                             )}

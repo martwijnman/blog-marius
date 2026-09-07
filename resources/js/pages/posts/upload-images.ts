@@ -4,6 +4,28 @@ export interface PostImage {
     path: string;
 }
 
+/**
+ * Een tweede keer bestanden kiezen verving de eerste selectie, waardoor je
+ * alleen meerdere foto's kon toevoegen als je ze in een keer selecteerde.
+ * Nieuwe bestanden worden nu toegevoegd, met dubbele eruit.
+ */
+export function mergeFiles(current: File[], added: FileList | File[]): File[] {
+    const identity = (file: File) =>
+        `${file.name}-${file.size}-${file.lastModified}`;
+
+    const seen = new Set(current.map(identity));
+    const merged = [...current];
+
+    for (const file of Array.from(added)) {
+        if (!seen.has(identity(file))) {
+            seen.add(identity(file));
+            merged.push(file);
+        }
+    }
+
+    return merged;
+}
+
 export const getImageSrc = (path: string) => {
     if (path.startsWith('http') || path.startsWith('/')) {
         return path;

@@ -16,6 +16,7 @@ import {
     deleteImage,
     fetchImages,
     getImageSrc,
+    mergeFiles,
     uploadImages,
 } from './upload-images';
 import type { PostImage } from './upload-images';
@@ -71,7 +72,17 @@ export default function EditPost({ post, onSaved, categories }: Props) {
             return;
         }
 
-        setNewImages(Array.from(files));
+        setNewImages((current) => mergeFiles(current, files));
+
+        // Leegmaken, anders vuurt change niet als je hetzelfde bestand
+        // nogmaals kiest.
+        event.currentTarget.value = '';
+    };
+
+    const removeNewImage = (index: number) => {
+        setNewImages((current) =>
+            current.filter((_, position) => position !== index),
+        );
     };
 
     const removeImage = async (image: PostImage) => {
@@ -287,17 +298,38 @@ export default function EditPost({ post, onSaved, categories }: Props) {
                             />
 
                             {newImages.length > 0 && (
-                                <p className="text-sm text-muted-foreground">
-                                    {newImages.length === 1
-                                        ? '1 new image will be added on submit.'
-                                        : `${newImages.length} new images will be added on submit.`}
-                                </p>
+                                <ul className="flex flex-col gap-1 text-sm text-muted-foreground">
+                                    {newImages.map((file, index) => (
+                                        <li
+                                            key={`${file.name}-${file.lastModified}`}
+                                            className="flex items-center justify-between gap-2"
+                                        >
+                                            <span className="truncate">
+                                                {file.name}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    removeNewImage(index)
+                                                }
+                                                className="shrink-0 underline"
+                                            >
+                                                remove
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
                             )}
                         </div>
                     </div>
 
                     <div className="border-t pt-4">
-                        <Button type="submit" loading={isSaving} fullWidth>
+                        <Button
+                            type="submit"
+                            color="dark"
+                            loading={isSaving}
+                            fullWidth
+                        >
                             Submit
                         </Button>
                     </div>
