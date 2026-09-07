@@ -38,7 +38,9 @@ class ImageController extends Controller
         $data = $request->validate([
             'post_id' => ['required', 'integer'],
             'images' => ['required', 'array'],
-            'images.*' => ['file', 'image', 'max:5120'],
+            // 10 MB, passend bij upload_max_filesize=12M in de Dockerfile.
+            // Een telefoonfoto is al snel 5-8 MB en werd op 5120 geweigerd.
+            'images.*' => ['file', 'image', 'max:10240'],
         ]);
 
         abort_unless($this->postExists($data['post_id']), 404, 'Post not found');
