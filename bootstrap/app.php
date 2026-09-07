@@ -62,6 +62,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Vercel zit als reverse proxy voor de container en geeft het schema
+        // door via X-Forwarded-Proto. Zonder dit denkt Laravel dat elke
+        // request over http binnenkomt en genereert het asset-URL's met
+        // http://, die vanaf een https-pagina niet geladen worden.
+        $middleware->trustProxies(at: '*');
+
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
         $middleware->web(append: [

@@ -39,9 +39,7 @@ return [
     |
     */
 
-    // TIJDELIJK: hard aan om de echte exception op de foutpagina te zien.
-    // Zet dit terug op (bool) env('APP_DEBUG', false) zodra we hem hebben.
-    'debug' => true,
+    'debug' => (bool) env('APP_DEBUG', false),
 
     /*
     |--------------------------------------------------------------------------
