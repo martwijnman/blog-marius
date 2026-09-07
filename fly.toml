@@ -1,4 +1,4 @@
-# Fly.io: draait Dockerfile.vercel zoals hij is, met een volume voor de
+# Fly.io: draait Dockerfile (de variant met entrypoint), met een volume voor de
 # dingen die een deploy moeten overleven.
 #
 # Eenmalig aanmaken:
@@ -11,7 +11,7 @@ app = "blog-marius"
 primary_region = "ams"
 
 [build]
-  dockerfile = "Dockerfile.vercel"
+  dockerfile = "Dockerfile"
 
 [env]
   APP_ENV = "production"

@@ -112,15 +112,19 @@ ENV PORT=80 \
     LOG_CHANNEL=stderr
 
 COPY --chown=www-data:www-data Caddyfile /etc/frankenphp/Caddyfile
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 COPY --from=build --chown=www-data:www-data /app /app
 
-RUN mkdir -p /tmp/views \
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
+    && mkdir -p /tmp/views \
     && chown www-data:www-data /tmp/views \
     && setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/frankenphp \
     && chown -R www-data:www-data /config/caddy /data/caddy /app/storage /app/bootstrap/cache /app/database
 
-USER www-data
-
+# Geen USER www-data meer: het entrypoint start als root om het volume te
+# kunnen aanmaken en chownen, en zakt daarna zelf terug naar www-data.
 EXPOSE 80
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
