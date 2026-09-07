@@ -1,11 +1,17 @@
 # Fly.io: draait Dockerfile (de variant met entrypoint), met een volume voor de
 # dingen die een deploy moeten overleven.
 #
-# Eenmalig aanmaken:
-#   fly launch --no-deploy --copy-config
-#   fly volumes create blog_data --size 1
-#   fly secrets set APP_KEY="base64:..."   # dezelfde als in je lokale .env
+# Eenmalig, in deze map (bewust zonder `fly launch`: die herschrijft dit
+# bestand en voegt eigen aannames toe):
+#
+#   fly auth login
+#   fly apps create blog-marius
+#   fly volumes create blog_data --size 1 --region ams --app blog-marius
+#   fly secrets set APP_KEY="base64:..." --app blog-marius
 #   fly deploy
+#
+# De APP_KEY is dezelfde als regel 3 van je lokale .env. Zet hem echt, anders
+# word je bij elke deploy uitgelogd.
 
 app = "blog-marius"
 primary_region = "ams"
