@@ -76,6 +76,9 @@ ENV APP_ENV=production \
     QUEUE_CONNECTION=sync \
     LOG_CHANNEL=stderr
 
+# Fallback-APP_KEY voor als de env var op Vercel leeg is (zie config/app.php).
+RUN php -r 'file_put_contents("/app/.deploy-key", "base64:".base64_encode(random_bytes(32)));'
+
 # Alleen CategorySeeder draaien: DatabaseSeeder roept User::factory() aan en
 # dus fake(), en fakerphp/faker zit in require-dev - die bestaat niet in deze
 # --no-dev build.

@@ -39,7 +39,9 @@ return [
     |
     */
 
-    'debug' => (bool) env('APP_DEBUG', false),
+    // TIJDELIJK: hard aan om de echte exception op de foutpagina te zien.
+    // Zet dit terug op (bool) env('APP_DEBUG', false) zodra we hem hebben.
+    'debug' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -97,7 +99,12 @@ return [
 
     'cipher' => 'AES-256-CBC',
 
-    'key' => env('APP_KEY'),
+    // Valt terug op de sleutel die tijdens de Docker-build is gegenereerd,
+    // zodat een lege APP_KEY op Vercel de app niet meer sloopt. Die sleutel
+    // verandert bij elke deploy: bestaande sessies en cookies vervallen dan.
+    'key' => env('APP_KEY') ?: (is_readable(__DIR__.'/../.deploy-key')
+        ? trim((string) file_get_contents(__DIR__.'/../.deploy-key'))
+        : null),
 
     'previous_keys' => [
         ...array_filter(
