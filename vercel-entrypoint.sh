@@ -58,7 +58,28 @@ if [ "$(echo "${DB_CONNECTION:-}" | tr -d '[:space:]')" = "pgsql" ]; then
     fi
 
     run php artisan migrate --force
-    run php artisan db:seed --force
+
+    # Seeden gebeurt ALLEEN als de database nog leeg is. De seeder zelf is
+    # idempotent (firstOrCreate), maar hem bij elke containerstart draaien is
+    # onnodige productie-schrijfacties op Neon. Faalt de check, dan seeden we
+    # niet: een draaiende site met bestaande data is belangrijker.
+    seed_needed=$(php -r '
+        require "/app/vendor/autoload.php";
+        $app = require "/app/bootstrap/app.php";
+        $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+        try {
+            echo Illuminate\Support\Facades\DB::table("users")->count() > 0 ? "no" : "yes";
+        } catch (Throwable $e) {
+            echo "error";
+        }
+    ' 2>/dev/null)
+    log "seed-check: users-tabel -> ${seed_needed:-<geen antwoord>}"
+
+    if [ "$seed_needed" = "yes" ]; then
+        run php artisan db:seed --force
+    else
+        log "seeden overgeslagen (database is niet leeg of check mislukte)"
+    fi
 
     # De webserver draait weer gewoon over de pooler.
     unset DB_URL
