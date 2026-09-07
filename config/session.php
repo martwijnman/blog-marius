@@ -22,7 +22,7 @@ return [
     // met een lege waarde, en dan geeft env() geen default terug maar '' /
     // null. De session manager kreeg daardoor geen driver en elke request
     // eindigde in een ArgumentCountError (HTTP 500).
-    'driver' => env('SESSION_DRIVER') ?: 'database',
+    'driver' => trim((string) env('SESSION_DRIVER')) ?: 'database',
 
     /*
     |--------------------------------------------------------------------------

@@ -102,7 +102,7 @@ return [
     // Valt terug op de sleutel die tijdens de Docker-build is gegenereerd,
     // zodat een lege APP_KEY op Vercel de app niet meer sloopt. Die sleutel
     // verandert bij elke deploy: bestaande sessies en cookies vervallen dan.
-    'key' => env('APP_KEY') ?: (is_readable(__DIR__.'/../.deploy-key')
+    'key' => trim((string) env('APP_KEY')) ?: (is_readable(__DIR__.'/../.deploy-key')
         ? trim((string) file_get_contents(__DIR__.'/../.deploy-key'))
         : null),
 

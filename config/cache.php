@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => env('CACHE_STORE') ?: 'database',
+    'default' => trim((string) env('CACHE_STORE')) ?: 'database',
 
     /*
     |--------------------------------------------------------------------------
