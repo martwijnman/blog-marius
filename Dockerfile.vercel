@@ -109,6 +109,9 @@ ENV PORT=80 \
     APP_ENV=production \
     APP_DEBUG=false \
     VIEW_COMPILED_PATH=/tmp/views \
+    SESSION_DRIVER=cookie \
+    CACHE_STORE=array \
+    QUEUE_CONNECTION=sync \
     LOG_CHANNEL=stderr
 
 COPY --chown=www-data:www-data Caddyfile /etc/frankenphp/Caddyfile
