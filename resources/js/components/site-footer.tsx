@@ -54,34 +54,6 @@ export default function SiteFooter() {
                         </Link>
                     </div>
                 </div>
-                <div>
-                    <h2 className="mb-3 text-xs font-medium tracking-[0.25em] text-neutral-500 uppercase">
-                        Follow me
-                    </h2>
-                    <div className="flex flex-col gap-2">
-                        <a
-                            href="https://instagram.com"
-                            target="_blank"
-                            rel="noreferrer"
-                        >
-                            Instagram
-                        </a>
-                        <a
-                            href="https://linkedin.com"
-                            target="_blank"
-                            rel="noreferrer"
-                        >
-                            LinkedIn
-                        </a>
-                        <a
-                            href="https://youtube.com"
-                            target="_blank"
-                            rel="noreferrer"
-                        >
-                            Youtube
-                        </a>
-                    </div>
-                </div>
             </div>
 
             <div className="shrink-0 text-left md:text-right">

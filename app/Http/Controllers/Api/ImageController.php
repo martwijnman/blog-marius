@@ -9,17 +9,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ImageController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * De bytes blijven hier buiten: een lijst met afbeeldingen hoeft alleen
+     * te weten welke er zijn, niet wat erin zit.
      */
+    private const LIST_COLUMNS = ['id', 'post_id', 'path', 'mime_type'];
+
     public function index(string $post_id)
     {
-        $images = Image::where('post_id', $post_id)->get();
-
-        return response()->json($images);
+        return response()->json(
+            Image::where('post_id', $post_id)->get(self::LIST_COLUMNS)
+        );
     }
 
     /**
@@ -27,7 +31,7 @@ class ImageController extends Controller
      */
     public function all()
     {
-        return response()->json(Image::all());
+        return response()->json(Image::get(self::LIST_COLUMNS));
     }
 
     /**
@@ -46,12 +50,20 @@ class ImageController extends Controller
         abort_unless($this->postExists($data['post_id']), 404, 'Post not found');
 
         $images = collect($request->file('images'))->map(function ($file) use ($data) {
-            $path = $file->store('posts/'.$data['post_id'], 'public');
+            // path is geen bestand op schijf meer, maar de sleutel waarmee
+            // /media/{path} de rij terugvindt. Blijft daarmee compatibel met
+            // afbeeldingen die eerder wel op schijf zijn beland.
+            $extension = $file->extension() ?: 'bin';
+            $path = 'posts/'.$data['post_id'].'/'.Str::ulid().'.'.$extension;
 
-            return Image::create([
+            $image = Image::create([
                 'post_id' => $data['post_id'],
                 'path' => $path,
+                'mime_type' => $file->getMimeType(),
+                'contents' => $file->get(),
             ]);
+
+            return $image->only(self::LIST_COLUMNS);
         });
 
         return response()->json($images->values(), 201);
@@ -76,7 +88,11 @@ class ImageController extends Controller
     {
         $image = Image::findOrFail($id);
 
-        Storage::disk('public')->delete($image->path);
+        // Oudere afbeeldingen staan nog als bestand op de schijf.
+        if ($image->path && Storage::disk('public')->exists($image->path)) {
+            Storage::disk('public')->delete($image->path);
+        }
+
         $image->delete();
 
         return response()->noContent();

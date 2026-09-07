@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AnalyticsController;
+use App\Models\Image;
 use App\Models\Post;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -15,6 +16,17 @@ use Inertia\Inertia;
 Route::get('/media/{path}', function (string $path) {
     // {path} vangt alles inclusief slashes, dus ../ hier expliciet weren.
     abort_if(str_contains($path, '..'), 404);
+
+    $image = Image::where('path', $path)->first();
+
+    if ($image && ($contents = $image->binaryContents()) !== null) {
+        return response($contents, 200, [
+            'Content-Type' => $image->mime_type ?: 'application/octet-stream',
+            'Cache-Control' => 'public, max-age=31536000, immutable',
+        ]);
+    }
+
+    // Afbeeldingen van voor de overstap staan nog op schijf.
     abort_unless(Storage::disk('public')->exists($path), 404);
 
     return Storage::disk('public')->response($path);
