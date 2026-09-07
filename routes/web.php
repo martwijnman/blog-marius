@@ -32,6 +32,38 @@ Route::get('/media/{path}', function (string $path) {
     return Storage::disk('public')->response($path);
 })->where('path', '.*')->name('media');
 
+/*
+ * Diagnose-route. Op Vercel blijven de Runtime Logs leeg, dus zonder dit
+ * eindpunt is een opstartfout van de container onzichtbaar. Raakt geen
+ * sessie of view aan, zodat hij ook werkt als de rest 500't.
+ * Aanroepen met ?key=blog-diag-2026.
+ */
+Route::get('/__boot', function () {
+    abort_unless(request('key') === 'blog-diag-2026', 404);
+
+    $lines = [];
+    $lines[] = 'default connection: '.config('database.default');
+    $lines[] = 'DATABASE_URL env: '.(env('DATABASE_URL') ? 'aanwezig' : 'leeg');
+    $lines[] = 'SESSION_DRIVER: '.config('session.driver');
+    $lines[] = 'pdo drivers: '.implode(',', \PDO::getAvailableDrivers());
+
+    try {
+        $pdo = \Illuminate\Support\Facades\DB::connection()->getPdo();
+        $lines[] = 'DB verbinding: OK ('.$pdo->getAttribute(\PDO::ATTR_SERVER_VERSION).')';
+        $tables = \Illuminate\Support\Facades\DB::connection()->getSchemaBuilder()->getTableListing();
+        $lines[] = 'tabellen: '.implode(', ', $tables);
+        $lines[] = 'posts: '.\Illuminate\Support\Facades\DB::table('posts')->count();
+        $lines[] = 'images: '.\Illuminate\Support\Facades\DB::table('images')->count();
+    } catch (\Throwable $e) {
+        $lines[] = 'DB FOUT: '.get_class($e).': '.$e->getMessage();
+    }
+
+    $lines[] = str_repeat('=', 40);
+    $lines[] = is_readable('/tmp/boot.log') ? (string) file_get_contents('/tmp/boot.log') : 'geen /tmp/boot.log';
+
+    return response(implode("\n", $lines), 200, ['Content-Type' => 'text/plain; charset=utf-8']);
+})->name('boot_diag');
+
 Route::inertia('/', 'welcome')->name('home');
 Route::inertia('/archive', 'posts/archive')->name('posts_archive');
 
