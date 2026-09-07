@@ -18,7 +18,9 @@ return [
     |
     */
 
-    'default' => env('LOG_CHANNEL', 'stack'),
+    // ?: in plaats van een env()-default, zodat een lege LOG_CHANNEL op
+    // Vercel niet in een ongeldig kanaal eindigt en fouten stil verdwijnen.
+    'default' => env('LOG_CHANNEL') ?: 'stack',
 
     /*
     |--------------------------------------------------------------------------
@@ -54,7 +56,10 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', (string) env('LOG_STACK', 'single')),
+            // stderr staat er standaard bij: in een container is dat de enige
+            // plek waar een exception zichtbaar wordt (storage/logs is weg na
+            // elke deploy en is van buiten niet te lezen).
+            'channels' => explode(',', (string) (env('LOG_STACK') ?: 'single,stderr')),
             'ignore_exceptions' => false,
         ],
 
