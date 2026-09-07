@@ -31,7 +31,6 @@
     "dependencies": {
         "@inertiajs/react": "^3.0.0",
         "@inertiajs/vite": "^3.0.0",
-        "@laravel/passkeys": "^0.2.0",
         "@mantine/charts": "^9.5.2",
         "@mantine/core": "^9.5.2",
         "@mantine/hooks": "^9.5.2",

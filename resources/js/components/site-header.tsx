@@ -1,7 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
-import { dashboard, login, register } from '@/routes';
+import { dashboard, login } from '@/routes';
 import { cn } from '@/lib/utils';
 
 type NavLink = {
@@ -126,20 +126,12 @@ export default function SiteHeader() {
                             Dashboard
                         </Link>
                     ) : (
-                        <>
-                            <Link
-                                href={login()}
-                                className="rounded-md px-3 py-2 font-medium transition hover:bg-accent"
-                            >
-                                Log in
-                            </Link>
-                            <Link
-                                href={register()}
-                                className="rounded-md bg-primary px-3 py-2 font-medium text-primary-foreground transition hover:opacity-90"
-                            >
-                                Register
-                            </Link>
-                        </>
+                        <Link
+                            href={login()}
+                            className="rounded-md px-3 py-2 font-medium transition hover:bg-accent"
+                        >
+                            Log in
+                        </Link>
                     )}
 
                     <button
