@@ -94,15 +94,24 @@ RUN php artisan storage:link --force
 # ---------- RUNTIME ----------
 FROM base AS runtime
 
+# Blade compileert views naar view.compiled. Zonder config/view.php is dat
+# realpath(storage_path('framework/views')), en dat pad is in deze container
+# niet betrouwbaar schrijfbaar: de gecompileerde app.blade.php stond er wel,
+# maar het inline-component bestand van <x-inertia::head> niet - vandaar
+# 'View [<hash>] not found' op elke pagina. Een eigen map onder /tmp is per
+# instance altijd schrijfbaar, en Blade bouwt de cache daar zelf opnieuw op.
 ENV PORT=80 \
     APP_ENV=production \
     APP_DEBUG=false \
+    VIEW_COMPILED_PATH=/tmp/views \
     LOG_CHANNEL=stderr
 
 COPY --chown=www-data:www-data Caddyfile /etc/frankenphp/Caddyfile
 COPY --from=build --chown=www-data:www-data /app /app
 
-RUN setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/frankenphp \
+RUN mkdir -p /tmp/views \
+    && chown www-data:www-data /tmp/views \
+    && setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/frankenphp \
     && chown -R www-data:www-data /config/caddy /data/caddy /app/storage /app/bootstrap/cache /app/database
 
 USER www-data
