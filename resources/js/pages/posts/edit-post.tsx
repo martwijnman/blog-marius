@@ -146,136 +146,161 @@ export default function EditPost({ post, onSaved, categories }: Props) {
 
             <SheetContent
                 side="right"
-                className="w-full max-w-lg overflow-y-auto p-4 sm:max-w-lg"
+                className="flex w-full max-w-lg flex-col p-4 sm:max-w-lg"
             >
                 <SheetTitle>Edit {post.title}</SheetTitle>
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                    <TextInput
-                        label="Title"
-                        value={form.title}
-                        onChange={(event) => {
-                            const { value } = event.currentTarget;
+                <form
+                    onSubmit={handleSubmit}
+                    className="flex min-h-0 flex-1 flex-col gap-4"
+                >
+                    {/* Bestaande afbeeldingen duwden het bestandsveld en de
+                        Submit-knop buiten beeld; alleen dit deel scrollt. */}
+                    <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1">
+                        <TextInput
+                            label="Title"
+                            value={form.title}
+                            onChange={(event) => {
+                                const { value } = event.currentTarget;
 
-                            setForm((currentForm) => ({
-                                ...currentForm,
-                                title: value,
-                            }));
-                        }}
-                        required
-                    />
-
-                    <TextInput
-                        label="Slug"
-                        value={form.slug}
-                        onChange={(event) => {
-                            const { value } = event.currentTarget;
-
-                            setForm((currentForm) => ({
-                                ...currentForm,
-                                slug: value,
-                            }));
-                        }}
-                        required
-                    />
-
-                    <Textarea
-                        label="Excerpt"
-                        value={form.excerpt ?? ''}
-                        onChange={(event) => {
-                            const { value } = event.currentTarget;
-
-                            setForm((currentForm) => ({
-                                ...currentForm,
-                                excerpt: value,
-                            }));
-                        }}
-                    />
-
-                    <Textarea
-                        label="Content"
-                        value={form.content}
-                        onChange={(event) => {
-                            const { value } = event.currentTarget;
-
-                            setForm((currentForm) => ({
-                                ...currentForm,
-                                content: value,
-                            }));
-                        }}
-                        minRows={6}
-                        required
-                    />
-
-                    <Select
-                        label="Category"
-                        data={[
-                            { value: '', label: 'No category' },
-                            ...categories.map((category) => ({
-                                value: String(category.id),
-                                label: category.name,
-                            })),
-                        ]}
-                        value={form.category_id ? String(form.category_id) : ''}
-                        onChange={(value) =>
-                            setForm((currentForm) => ({
-                                ...currentForm,
-                                category_id: value ? Number(value) : null,
-                            }))
-                        }
-                    />
-
-                    <Select
-                        label="Status"
-                        data={['draft', 'published', 'archived']}
-                        value={form.status}
-                        onChange={(value) =>
-                            setForm((currentForm) => ({
-                                ...currentForm,
-                                status: (value ?? 'draft') as Post['status'],
-                            }))
-                        }
-                    />
-
-                    <div className="grid gap-2">
-                        <label className="text-sm font-medium">Images</label>
-
-                        {images.length > 0 && (
-                            <div className="grid grid-cols-3 gap-2">
-                                {images.map((image) => (
-                                    <div key={image.id} className="relative">
-                                        <img
-                                            src={getImageSrc(image.path)}
-                                            alt={post.title}
-                                            className="aspect-square w-full rounded-md object-cover"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                void removeImage(image)
-                                            }
-                                            className="absolute top-1 right-1 rounded-full bg-black/70 p-1.5 text-white"
-                                            aria-label="Delete image"
-                                        >
-                                            <FaTrash size={12} />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        <input
-                            key={fileInputKey}
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            onChange={handleImages}
-                            className="text-sm"
+                                setForm((currentForm) => ({
+                                    ...currentForm,
+                                    title: value,
+                                }));
+                            }}
+                            required
                         />
+
+                        <TextInput
+                            label="Slug"
+                            value={form.slug}
+                            onChange={(event) => {
+                                const { value } = event.currentTarget;
+
+                                setForm((currentForm) => ({
+                                    ...currentForm,
+                                    slug: value,
+                                }));
+                            }}
+                            required
+                        />
+
+                        <Textarea
+                            label="Excerpt"
+                            value={form.excerpt ?? ''}
+                            onChange={(event) => {
+                                const { value } = event.currentTarget;
+
+                                setForm((currentForm) => ({
+                                    ...currentForm,
+                                    excerpt: value,
+                                }));
+                            }}
+                        />
+
+                        <Textarea
+                            label="Content"
+                            value={form.content}
+                            onChange={(event) => {
+                                const { value } = event.currentTarget;
+
+                                setForm((currentForm) => ({
+                                    ...currentForm,
+                                    content: value,
+                                }));
+                            }}
+                            minRows={6}
+                            required
+                        />
+
+                        <Select
+                            label="Category"
+                            data={[
+                                { value: '', label: 'No category' },
+                                ...categories.map((category) => ({
+                                    value: String(category.id),
+                                    label: category.name,
+                                })),
+                            ]}
+                            value={
+                                form.category_id ? String(form.category_id) : ''
+                            }
+                            onChange={(value) =>
+                                setForm((currentForm) => ({
+                                    ...currentForm,
+                                    category_id: value ? Number(value) : null,
+                                }))
+                            }
+                        />
+
+                        <Select
+                            label="Status"
+                            data={['draft', 'published', 'archived']}
+                            value={form.status}
+                            onChange={(value) =>
+                                setForm((currentForm) => ({
+                                    ...currentForm,
+                                    status: (value ??
+                                        'draft') as Post['status'],
+                                }))
+                            }
+                        />
+
+                        <div className="grid gap-2">
+                            <label className="text-sm font-medium">
+                                Images
+                            </label>
+
+                            {images.length > 0 && (
+                                <div className="grid grid-cols-6 gap-2">
+                                    {images.map((image) => (
+                                        <div
+                                            key={image.id}
+                                            className="relative"
+                                        >
+                                            <img
+                                                src={getImageSrc(image.path)}
+                                                alt={post.title}
+                                                className="aspect-square w-full rounded-md object-cover"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    void removeImage(image)
+                                                }
+                                                className="absolute top-1 right-1 rounded-full bg-black/70 p-1.5 text-white"
+                                                aria-label="Delete image"
+                                            >
+                                                <FaTrash size={12} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <input
+                                key={fileInputKey}
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={handleImages}
+                                className="text-sm"
+                            />
+
+                            {newImages.length > 0 && (
+                                <p className="text-sm text-muted-foreground">
+                                    {newImages.length === 1
+                                        ? '1 new image will be added on submit.'
+                                        : `${newImages.length} new images will be added on submit.`}
+                                </p>
+                            )}
+                        </div>
                     </div>
 
-                    <Button type="submit" loading={isSaving}>
-                        Submit
-                    </Button>
+                    <div className="border-t pt-4">
+                        <Button type="submit" loading={isSaving} fullWidth>
+                            Submit
+                        </Button>
+                    </div>
                 </form>
             </SheetContent>
         </Sheet>
