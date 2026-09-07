@@ -39,8 +39,29 @@ run php artisan config:clear
 run php artisan view:clear
 
 if [ "$(echo "${DB_CONNECTION:-}" | tr -d '[:space:]')" = "pgsql" ]; then
+    # Neon geeft twee hosts: de pooler (PgBouncer, transaction mode) en een
+    # directe verbinding. Over de pooler mislukken migraties: DDL en de
+    # prepared statements die Laravel gebruikt overleven het poolen niet, en
+    # Postgres gooit daarna 25P02 op elk volgend statement in de transactie.
+    # Migreren en seeden gaat daarom over de UNPOOLED url; de webserver zelf
+    # blijft de pooler gebruiken, want die heeft de connectiepool wel nodig.
+    for candidate in "${DATABASE_URL_UNPOOLED:-}" "${POSTGRES_URL_NON_POOLING:-}" "${POSTGRES_URL_NO_SSL:-}"; do
+        if [ -n "$candidate" ]; then
+            DB_URL="$candidate"
+            export DB_URL
+            log "migreren via directe (unpooled) verbinding"
+            break
+        fi
+    done
+    if [ -z "${DB_URL:-}" ]; then
+        log "LET OP: geen unpooled url gevonden, migreren via de pooler"
+    fi
+
     run php artisan migrate --force
     run php artisan db:seed --force
+
+    # De webserver draait weer gewoon over de pooler.
+    unset DB_URL
 fi
 
 log "entrypoint klaar, webserver start"

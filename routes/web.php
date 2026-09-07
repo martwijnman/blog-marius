@@ -46,6 +46,13 @@ Route::get('/__boot', function () {
     $lines[] = 'DATABASE_URL env: '.(env('DATABASE_URL') ? 'aanwezig' : 'leeg');
     $lines[] = 'SESSION_DRIVER: '.config('session.driver');
     $lines[] = 'pdo drivers: '.implode(',', \PDO::getAvailableDrivers());
+    // Alleen de NAMEN, nooit de waarden: hier staan wachtwoorden in.
+    $dbEnvNames = array_values(array_filter(
+        array_keys($_SERVER),
+        fn ($n) => is_string($n) && preg_match('/^(DATABASE_|POSTGRES_|PG|DB_)/', $n) === 1
+    ));
+    sort($dbEnvNames);
+    $lines[] = 'db-gerelateerde env vars (namen): '.implode(', ', $dbEnvNames);
 
     try {
         $pdo = \Illuminate\Support\Facades\DB::connection()->getPdo();
