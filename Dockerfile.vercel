@@ -98,8 +98,7 @@ FROM base AS runtime
 ENV PORT=80 \
     APP_ENV=production \
     APP_DEBUG=false \
-    LOG_CHANNEL=stderr \
-    LOG_STDERR_FORMATTER=Monolog\Formatter\JsonFormatter
+    LOG_CHANNEL=stderr
 
 COPY --chown=www-data:www-data Caddyfile /etc/frankenphp/Caddyfile
 COPY --from=build --chown=www-data:www-data /app /app
