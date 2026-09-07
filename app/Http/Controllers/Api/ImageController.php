@@ -56,12 +56,11 @@ class ImageController extends Controller
             $extension = $file->extension() ?: 'bin';
             $path = 'posts/'.$data['post_id'].'/'.Str::ulid().'.'.$extension;
 
-            $image = Image::create([
+            $image = Image::createWithBinary([
                 'post_id' => $data['post_id'],
                 'path' => $path,
                 'mime_type' => $file->getMimeType(),
-                'contents' => $file->get(),
-            ]);
+            ], $file->get());
 
             return $image->only(self::LIST_COLUMNS);
         });
