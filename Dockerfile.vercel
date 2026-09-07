@@ -1,0 +1,81 @@
+# syntax=docker/dockerfile:1
+
+FROM dunglas/frankenphp:1-php8.4-bookworm AS base
+
+RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
+    && install-php-extensions \
+        intl \
+        zip \
+        opcache \
+        pcntl \
+        pdo_pgsql \
+        pdo_mysql
+
+WORKDIR /app
+
+
+# ---------- BUILD ----------
+FROM base AS build
+
+# vite.config.ts gebruikt dit om wayfinder over te slaan tijdens de build,
+# zodat er geen booted Laravel-app (en dus geen APP_KEY/.env) nodig is.
+ENV VERCEL=1
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Node 22, zonder FrankenPHP's eigen binaries in /usr/local te overschrijven
+COPY --from=node:22-bookworm /usr/local/bin/node /usr/local/bin/node
+COPY --from=node:22-bookworm /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
+
+# PHP-dependencies (zonder scripts: artisan bestaat hier nog niet)
+COPY composer.json composer.lock ./
+RUN composer install \
+        --no-dev \
+        --no-scripts \
+        --no-autoloader \
+        --no-interaction \
+        --no-progress \
+        --prefer-dist
+
+# Node-dependencies
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Applicatiecode
+COPY . .
+
+RUN mkdir -p \
+        storage/framework/cache/data \
+        storage/framework/sessions \
+        storage/framework/views \
+        storage/logs \
+        bootstrap/cache
+
+RUN composer dump-autoload --no-dev --optimize --classmap-authoritative
+
+# Vite/React build. Wayfinder wordt overgeslagen als VERCEL gezet is
+# (zie vite.config.ts); de gegenereerde routes staan in git.
+RUN npm run build
+
+
+# ---------- RUNTIME ----------
+FROM base AS runtime
+
+ENV PORT=80 \
+    APP_ENV=production \
+    APP_DEBUG=false \
+    LOG_CHANNEL=stderr \
+    LOG_STDERR_FORMATTER=Monolog\Formatter\JsonFormatter
+
+COPY --chown=www-data:www-data Caddyfile /etc/frankenphp/Caddyfile
+COPY --from=build --chown=www-data:www-data /app /app
+
+RUN setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/frankenphp \
+    && chown -R www-data:www-data /config/caddy /data/caddy /app/storage /app/bootstrap/cache
+
+USER www-data
+
+EXPOSE 80
+
+CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]

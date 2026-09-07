@@ -5,8 +5,6 @@ import { AreaChart, BarChart, DonutChart, LineChart } from '@mantine/charts';
 import type { ReactNode } from 'react';
 import { analytics } from '@/routes';
 import { useAppearance } from '@/hooks/use-appearance';
-import WorldMap from '@/components/WorldMap';
-import type { CountryMarker } from '@/components/WorldMap';
 
 /**
  * Categorical palette, validated for colour-vision deficiency against both the
@@ -35,6 +33,21 @@ const PALETTE = {
         '#9085e9',
         '#e66767',
     ],
+} as const;
+
+/**
+ * One slot per measure, assigned by what the series *is* rather than by where it
+ * lands in a grid, so a colour never changes meaning between two cards.
+ */
+const SLOT = {
+    views: 0,
+    likes: 1,
+    comments: 2,
+    weekday: 3,
+    hour: 4,
+    publishing: 5,
+    category: 6,
+    country: 7,
 } as const;
 
 type PostStatus = 'draft' | 'published' | 'archived';
@@ -76,7 +89,12 @@ type TopPost = {
     engagement: number;
 };
 
-type Country = CountryMarker & { code: string };
+type Country = {
+    code: string;
+    name: string;
+    views: number;
+    share: number;
+};
 
 type NamedCount = { name: string; views: number };
 
@@ -106,6 +124,11 @@ function formatNumber(value: number) {
     return numberFormat.format(value);
 }
 
+/** Mantine hands chart values in as `number | string`; only numbers get grouped. */
+function formatValue(value: number | string) {
+    return typeof value === 'number' ? formatNumber(value) : String(value);
+}
+
 function formatDuration(seconds: number) {
     if (seconds <= 0) {
         return '—';
@@ -116,6 +139,11 @@ function formatDuration(seconds: number) {
     }
 
     return `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
+}
+
+/** Long post titles would otherwise push the vertical bar axis off the card. */
+function truncate(value: string, max = 34) {
+    return value.length > max ? `${value.slice(0, max - 1)}…` : value;
 }
 
 function hasData(rows: { views?: number; posts?: number }[]) {
@@ -210,6 +238,11 @@ export default function Analytics({ stats }: Props) {
 
     const trackingGap = totals.views - totals.trackedViews;
 
+    const topPosts = stats.topPosts.slice(0, 8).map((post) => ({
+        ...post,
+        title: truncate(post.title),
+    }));
+
     const donut = (rows: NamedCount[]) =>
         rows.map((row, index) => ({
             name: row.name,
@@ -231,7 +264,8 @@ export default function Analytics({ stats }: Props) {
                     </div>
                     <p className="text-sm text-muted-foreground">
                         {formatNumber(totals.posts)} posts ·{' '}
-                        {formatNumber(totals.published)} published
+                        {formatNumber(totals.published)} published ·{' '}
+                        {formatNumber(totals.drafts)} drafts
                     </p>
                 </div>
 
@@ -283,21 +317,23 @@ export default function Analytics({ stats }: Props) {
                             withLegend
                             tickLine="x"
                             gridAxis="y"
+                            valueFormatter={formatValue}
+                            xAxisProps={{ minTickGap: 24 }}
                             series={[
                                 {
                                     name: 'views',
                                     label: 'Views',
-                                    color: colors[0],
+                                    color: colors[SLOT.views],
                                 },
                                 {
                                     name: 'likes',
                                     label: 'Likes',
-                                    color: colors[1],
+                                    color: colors[SLOT.likes],
                                 },
                                 {
                                     name: 'comments',
                                     label: 'Comments',
-                                    color: colors[2],
+                                    color: colors[SLOT.comments],
                                 },
                             ]}
                         />
@@ -320,23 +356,24 @@ export default function Analytics({ stats }: Props) {
                 <div className="grid gap-4 lg:grid-cols-2">
                     <Card
                         title="Top posts"
-                        description="Most viewed posts, all time"
+                        description="The eight most viewed posts, all time"
                     >
-                        {hasData(stats.topPosts) ? (
+                        {hasData(topPosts) ? (
                             <BarChart
                                 h={300}
-                                data={stats.topPosts.slice(0, 8)}
+                                data={topPosts}
                                 dataKey="title"
                                 orientation="vertical"
                                 gridAxis="x"
                                 withBarValueLabel
-                                yAxisProps={{ width: 140 }}
+                                yAxisProps={{ width: 150 }}
                                 barProps={{ radius: 4 }}
+                                valueFormatter={formatValue}
                                 series={[
                                     {
                                         name: 'views',
                                         label: 'Views',
-                                        color: colors[0],
+                                        color: colors[SLOT.views],
                                     },
                                 ]}
                             />
@@ -349,7 +386,7 @@ export default function Analytics({ stats }: Props) {
                         title="Traffic sources"
                         description="Where readers arrived from"
                     >
-                        {stats.referrers.length > 0 ? (
+                        {hasData(stats.referrers) ? (
                             <BarChart
                                 h={300}
                                 data={stats.referrers}
@@ -359,11 +396,12 @@ export default function Analytics({ stats }: Props) {
                                 withBarValueLabel
                                 yAxisProps={{ width: 140 }}
                                 barProps={{ radius: 4 }}
+                                valueFormatter={formatValue}
                                 series={[
                                     {
                                         name: 'views',
                                         label: 'Visits',
-                                        color: colors[1],
+                                        color: colors[SLOT.likes],
                                     },
                                 ]}
                             />
@@ -377,11 +415,8 @@ export default function Analytics({ stats }: Props) {
                 </div>
 
                 <div className="grid gap-4 lg:grid-cols-3">
-                    <Card
-                        title="Devices"
-                        description="What readers browse on"
-                    >
-                        {stats.devices.length > 0 ? (
+                    <Card title="Devices" description="What readers browse on">
+                        {hasData(stats.devices) ? (
                             <DonutChart
                                 mx="auto"
                                 size={200}
@@ -392,6 +427,7 @@ export default function Analytics({ stats }: Props) {
                                 tooltipDataSource="segment"
                                 withLabels
                                 withLegend
+                                valueFormatter={formatValue}
                                 chartLabel={`${formatNumber(totals.trackedViews)} visits`}
                             />
                         ) : (
@@ -400,37 +436,60 @@ export default function Analytics({ stats }: Props) {
                     </Card>
 
                     <Card
-                        title="Reading depth"
-                        description="How long readers stay on a post"
+                        title="Audience"
+                        description="Countries your readers visit from"
                     >
-                        {hasData(stats.readTime) ? (
-                            <BarChart
-                                h={220}
-                                data={stats.readTime}
-                                dataKey="label"
-                                gridAxis="y"
-                                withBarValueLabel
-                                barProps={{ radius: 4 }}
-                                series={[
-                                    {
-                                        name: 'views',
-                                        label: 'Visits',
-                                        color: colors[2],
-                                    },
-                                ]}
-                            />
+                        {stats.countries.length > 0 ? (
+                            <div className="flex flex-col gap-4">
+                                <BarChart
+                                    h={200}
+                                    data={stats.countries}
+                                    dataKey="name"
+                                    orientation="vertical"
+                                    gridAxis="x"
+                                    withBarValueLabel
+                                    yAxisProps={{ width: 110 }}
+                                    barProps={{ radius: 4 }}
+                                    valueFormatter={formatValue}
+                                    series={[
+                                        {
+                                            name: 'views',
+                                            label: 'Visits',
+                                            color: colors[SLOT.country],
+                                        },
+                                    ]}
+                                />
+
+                                {/* The same numbers as the bars, with the share
+                                    the axis cannot show. */}
+                                <ul className="flex flex-col gap-2">
+                                    {stats.countries.map((country) => (
+                                        <li
+                                            key={country.code}
+                                            className="flex items-center justify-between gap-3 text-sm"
+                                        >
+                                            <span className="truncate">
+                                                {country.name}
+                                            </span>
+                                            <span className="shrink-0 text-muted-foreground tabular-nums">
+                                                {formatNumber(country.views)}{' '}
+                                                <span className="font-semibold text-foreground">
+                                                    {country.share}%
+                                                </span>
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
                         ) : (
                             <Empty>
-                                Read time is reported when a reader leaves a
-                                post. Nothing measured yet.
+                                No location data yet. Countries appear once
+                                visits carry a country header.
                             </Empty>
                         )}
                     </Card>
 
-                    <Card
-                        title="Library"
-                        description="Posts by status"
-                    >
+                    <Card title="Library" description="Posts by status">
                         {totals.posts > 0 ? (
                             <DonutChart
                                 mx="auto"
@@ -446,6 +505,7 @@ export default function Analytics({ stats }: Props) {
                                 tooltipDataSource="segment"
                                 withLabels
                                 withLegend
+                                valueFormatter={formatValue}
                                 chartLabel={`${formatNumber(totals.posts)} posts`}
                             />
                         ) : (
@@ -456,90 +516,94 @@ export default function Analytics({ stats }: Props) {
 
                 <div className="grid gap-4 lg:grid-cols-2">
                     <Card
-                        title="Audience"
-                        description="Where in the world your readers are"
+                        title="Reading depth"
+                        description="How long readers stay on a post"
                     >
-                        <WorldMap markers={stats.countries} />
-
-                        {stats.countries.length > 0 && (
-                            <ul className="mt-4 flex flex-col gap-2">
-                                {stats.countries.slice(0, 6).map((country) => (
-                                    <li
-                                        key={country.code}
-                                        className="flex items-center justify-between text-sm"
-                                    >
-                                        <span>{country.name}</span>
-                                        <span className="font-semibold tabular-nums">
-                                            {formatNumber(country.views)}
-                                        </span>
-                                    </li>
-                                ))}
-                            </ul>
+                        {hasData(stats.readTime) ? (
+                            <BarChart
+                                h={220}
+                                data={stats.readTime}
+                                dataKey="label"
+                                gridAxis="y"
+                                withBarValueLabel
+                                barProps={{ radius: 4 }}
+                                valueFormatter={formatValue}
+                                series={[
+                                    {
+                                        name: 'views',
+                                        label: 'Visits',
+                                        color: colors[SLOT.comments],
+                                    },
+                                ]}
+                            />
+                        ) : (
+                            <Empty>
+                                Read time is reported when a reader leaves a
+                                post. Nothing measured yet.
+                            </Empty>
                         )}
                     </Card>
 
-                    <div className="flex flex-col gap-4">
-                        <Card
-                            title="Best day to publish"
-                            description="Visits by day of the week"
-                        >
-                            {hasData(stats.weekdays) ? (
-                                <BarChart
-                                    h={180}
-                                    data={stats.weekdays}
-                                    dataKey="label"
-                                    gridAxis="y"
-                                    withBarValueLabel
-                                    barProps={{ radius: 4 }}
-                                    series={[
-                                        {
-                                            name: 'views',
-                                            label: 'Visits',
-                                            color: colors[3],
-                                        },
-                                    ]}
-                                />
-                            ) : (
-                                <Empty>No visits recorded yet.</Empty>
-                            )}
-                        </Card>
-
-                        <Card
-                            title="Reading hours"
-                            description="Visits by hour of the day"
-                        >
-                            {hasData(stats.hours) ? (
-                                <AreaChart
-                                    h={180}
-                                    data={stats.hours}
-                                    dataKey="label"
-                                    curveType="monotone"
-                                    strokeWidth={2}
-                                    withDots={false}
-                                    gridAxis="y"
-                                    series={[
-                                        {
-                                            name: 'views',
-                                            label: 'Visits',
-                                            color: colors[4],
-                                        },
-                                    ]}
-                                />
-                            ) : (
-                                <Empty>No visits recorded yet.</Empty>
-                            )}
-                        </Card>
-                    </div>
+                    <Card
+                        title="Best day to publish"
+                        description="Visits by day of the week"
+                    >
+                        {hasData(stats.weekdays) ? (
+                            <BarChart
+                                h={220}
+                                data={stats.weekdays}
+                                dataKey="label"
+                                gridAxis="y"
+                                withBarValueLabel
+                                barProps={{ radius: 4 }}
+                                valueFormatter={formatValue}
+                                series={[
+                                    {
+                                        name: 'views',
+                                        label: 'Visits',
+                                        color: colors[SLOT.weekday],
+                                    },
+                                ]}
+                            />
+                        ) : (
+                            <Empty>No visits recorded yet.</Empty>
+                        )}
+                    </Card>
                 </div>
 
                 <div className="grid gap-4 lg:grid-cols-2">
                     <Card
-                        title="Categories"
-                        description="Views per category"
+                        title="Reading hours"
+                        description="Visits by hour of the day, server time"
                     >
+                        {hasData(stats.hours) ? (
+                            <AreaChart
+                                h={220}
+                                data={stats.hours}
+                                dataKey="label"
+                                curveType="monotone"
+                                strokeWidth={2}
+                                withDots={false}
+                                gridAxis="y"
+                                valueFormatter={formatValue}
+                                xAxisProps={{ interval: 2 }}
+                                series={[
+                                    {
+                                        name: 'views',
+                                        label: 'Visits',
+                                        color: colors[SLOT.hour],
+                                    },
+                                ]}
+                            />
+                        ) : (
+                            <Empty>No visits recorded yet.</Empty>
+                        )}
+                    </Card>
+
+                    <Card title="Categories" description="Views per category">
                         {hasData(stats.categories) ? (
                             <BarChart
-                                h={240}
+                                h={220}
                                 data={stats.categories}
                                 dataKey="name"
                                 orientation="vertical"
@@ -547,11 +611,12 @@ export default function Analytics({ stats }: Props) {
                                 withBarValueLabel
                                 yAxisProps={{ width: 120 }}
                                 barProps={{ radius: 4 }}
+                                valueFormatter={formatValue}
                                 series={[
                                     {
                                         name: 'views',
                                         label: 'Views',
-                                        color: colors[6],
+                                        color: colors[SLOT.category],
                                     },
                                 ]}
                             />
@@ -559,32 +624,33 @@ export default function Analytics({ stats }: Props) {
                             <Empty>No categorised views yet.</Empty>
                         )}
                     </Card>
-
-                    <Card
-                        title="Publishing cadence"
-                        description="Posts created per month, last 12 months"
-                    >
-                        {hasData(stats.publishing) ? (
-                            <BarChart
-                                h={240}
-                                data={stats.publishing}
-                                dataKey="label"
-                                gridAxis="y"
-                                withBarValueLabel
-                                barProps={{ radius: 4 }}
-                                series={[
-                                    {
-                                        name: 'posts',
-                                        label: 'Posts',
-                                        color: colors[5],
-                                    },
-                                ]}
-                            />
-                        ) : (
-                            <Empty>No posts created in this period.</Empty>
-                        )}
-                    </Card>
                 </div>
+
+                <Card
+                    title="Publishing cadence"
+                    description="Posts created per month, last 12 months"
+                >
+                    {hasData(stats.publishing) ? (
+                        <BarChart
+                            h={220}
+                            data={stats.publishing}
+                            dataKey="label"
+                            gridAxis="y"
+                            withBarValueLabel
+                            barProps={{ radius: 4 }}
+                            valueFormatter={formatValue}
+                            series={[
+                                {
+                                    name: 'posts',
+                                    label: 'Posts',
+                                    color: colors[SLOT.publishing],
+                                },
+                            ]}
+                        />
+                    ) : (
+                        <Empty>No posts created in this period.</Empty>
+                    )}
+                </Card>
 
                 {/* The table is also the accessible fallback for every chart
                     above: the same numbers, readable without colour. */}
@@ -595,27 +661,52 @@ export default function Analytics({ stats }: Props) {
                     {stats.topPosts.length > 0 ? (
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
+                                <caption className="sr-only">
+                                    All posts sorted by views, with likes,
+                                    comments and engagement rate
+                                </caption>
                                 <thead>
-                                    <tr className="border-b border-sidebar-border/70 text-left text-xs uppercase tracking-wider text-muted-foreground">
-                                        <th className="py-2 pr-4 font-medium">
+                                    <tr className="border-b border-sidebar-border/70 text-left text-xs tracking-wider text-muted-foreground uppercase">
+                                        <th
+                                            scope="col"
+                                            className="py-2 pr-4 font-medium"
+                                        >
                                             Post
                                         </th>
-                                        <th className="py-2 pr-4 font-medium">
+                                        <th
+                                            scope="col"
+                                            className="py-2 pr-4 font-medium"
+                                        >
                                             Category
                                         </th>
-                                        <th className="py-2 pr-4 font-medium">
+                                        <th
+                                            scope="col"
+                                            className="py-2 pr-4 font-medium"
+                                        >
                                             Status
                                         </th>
-                                        <th className="py-2 pr-4 text-right font-medium">
+                                        <th
+                                            scope="col"
+                                            className="py-2 pr-4 text-right font-medium"
+                                        >
                                             Views
                                         </th>
-                                        <th className="py-2 pr-4 text-right font-medium">
+                                        <th
+                                            scope="col"
+                                            className="py-2 pr-4 text-right font-medium"
+                                        >
                                             Likes
                                         </th>
-                                        <th className="py-2 pr-4 text-right font-medium">
+                                        <th
+                                            scope="col"
+                                            className="py-2 pr-4 text-right font-medium"
+                                        >
                                             Comments
                                         </th>
-                                        <th className="py-2 text-right font-medium">
+                                        <th
+                                            scope="col"
+                                            className="py-2 text-right font-medium"
+                                        >
                                             Engagement
                                         </th>
                                     </tr>
@@ -626,13 +717,16 @@ export default function Analytics({ stats }: Props) {
                                             key={post.id}
                                             className="border-b border-sidebar-border/40 last:border-0"
                                         >
-                                            <td className="max-w-56 truncate py-2 pr-4">
+                                            <td
+                                                className="max-w-56 truncate py-2 pr-4"
+                                                title={post.title}
+                                            >
                                                 {post.title}
                                             </td>
                                             <td className="py-2 pr-4 text-muted-foreground">
                                                 {post.category ?? '—'}
                                             </td>
-                                            <td className="py-2 pr-4 text-muted-foreground">
+                                            <td className="py-2 pr-4 text-muted-foreground capitalize">
                                                 {post.status}
                                             </td>
                                             <td className="py-2 pr-4 text-right tabular-nums">

@@ -201,24 +201,49 @@ class AnalyticsController extends Controller
     }
 
     /**
+     * Top countries by tracked visit, tail folded into "Other". Each row carries
+     * its share of the located total so the UI never has to divide.
+     *
      * @param  Collection<int, PostView>  $views
      * @return array<int, array<string, mixed>>
      */
     private function countries(Collection $views): array
     {
-        return $views
-            ->filter(fn (PostView $view) => filled($view->country_code))
+        $located = $views->filter(fn (PostView $view) => filled($view->country_code));
+        $total = $located->count();
+
+        if ($total === 0) {
+            return [];
+        }
+
+        $grouped = $located
             ->groupBy(fn (PostView $view) => strtoupper($view->country_code))
-            ->map(fn (Collection $group, string $code) => [
+            ->map(fn (Collection $group) => $group->count())
+            ->sortDesc();
+
+        $rows = $grouped
+            ->take(self::TOP_N)
+            ->map(fn (int $count, string $code) => [
                 'code' => $code,
-                'name' => self::COUNTRIES[$code]['name'] ?? $code,
-                'x' => self::COUNTRIES[$code]['x'] ?? null,
-                'y' => self::COUNTRIES[$code]['y'] ?? null,
-                'views' => $group->count(),
+                'name' => self::COUNTRY_NAMES[$code] ?? $code,
+                'views' => $count,
+                'share' => round(($count / $total) * 100, 1),
             ])
-            ->sortByDesc('views')
             ->values()
             ->all();
+
+        $rest = $grouped->slice(self::TOP_N)->sum();
+
+        if ($rest > 0) {
+            $rows[] = [
+                'code' => 'OTHER',
+                'name' => 'Other',
+                'views' => $rest,
+                'share' => round(($rest / $total) * 100, 1),
+            ];
+        }
+
+        return $rows;
     }
 
     /**
@@ -394,58 +419,58 @@ class AnalyticsController extends Controller
     }
 
     /**
-     * Name and rough map position (percentages of the world map box) for the
-     * country codes an edge proxy is likely to report.
+     * Readable names for the country codes an edge proxy is likely to report.
+     * Anything outside this list falls back to the raw two-letter code.
      *
-     * @var array<string, array{name: string, x: float, y: float}>
+     * @var array<string, string>
      */
-    private const COUNTRIES = [
-        'NL' => ['name' => 'Netherlands', 'x' => 49.5, 'y' => 30.0],
-        'BE' => ['name' => 'Belgium', 'x' => 48.8, 'y' => 31.5],
-        'DE' => ['name' => 'Germany', 'x' => 51.5, 'y' => 30.5],
-        'FR' => ['name' => 'France', 'x' => 47.5, 'y' => 34.0],
-        'GB' => ['name' => 'United Kingdom', 'x' => 46.5, 'y' => 28.0],
-        'IE' => ['name' => 'Ireland', 'x' => 44.5, 'y' => 28.5],
-        'ES' => ['name' => 'Spain', 'x' => 45.5, 'y' => 37.0],
-        'PT' => ['name' => 'Portugal', 'x' => 43.5, 'y' => 37.5],
-        'IT' => ['name' => 'Italy', 'x' => 52.0, 'y' => 36.0],
-        'CH' => ['name' => 'Switzerland', 'x' => 50.5, 'y' => 32.5],
-        'AT' => ['name' => 'Austria', 'x' => 52.0, 'y' => 32.0],
-        'PL' => ['name' => 'Poland', 'x' => 54.0, 'y' => 29.5],
-        'CZ' => ['name' => 'Czechia', 'x' => 52.5, 'y' => 30.5],
-        'SE' => ['name' => 'Sweden', 'x' => 53.0, 'y' => 24.0],
-        'NO' => ['name' => 'Norway', 'x' => 51.0, 'y' => 23.0],
-        'DK' => ['name' => 'Denmark', 'x' => 51.0, 'y' => 27.5],
-        'FI' => ['name' => 'Finland', 'x' => 56.0, 'y' => 22.5],
-        'UA' => ['name' => 'Ukraine', 'x' => 57.5, 'y' => 30.0],
-        'RU' => ['name' => 'Russia', 'x' => 68.0, 'y' => 24.0],
-        'TR' => ['name' => 'Türkiye', 'x' => 58.0, 'y' => 36.0],
-        'GR' => ['name' => 'Greece', 'x' => 55.0, 'y' => 37.0],
-        'RO' => ['name' => 'Romania', 'x' => 55.5, 'y' => 32.0],
-        'US' => ['name' => 'United States', 'x' => 22.0, 'y' => 36.0],
-        'CA' => ['name' => 'Canada', 'x' => 22.0, 'y' => 25.0],
-        'MX' => ['name' => 'Mexico', 'x' => 19.0, 'y' => 45.0],
-        'BR' => ['name' => 'Brazil', 'x' => 33.0, 'y' => 63.0],
-        'AR' => ['name' => 'Argentina', 'x' => 30.0, 'y' => 75.0],
-        'CL' => ['name' => 'Chile', 'x' => 28.0, 'y' => 74.0],
-        'CO' => ['name' => 'Colombia', 'x' => 27.0, 'y' => 55.0],
-        'ZA' => ['name' => 'South Africa', 'x' => 53.5, 'y' => 76.0],
-        'NG' => ['name' => 'Nigeria', 'x' => 48.5, 'y' => 53.0],
-        'EG' => ['name' => 'Egypt', 'x' => 56.0, 'y' => 42.0],
-        'MA' => ['name' => 'Morocco', 'x' => 44.0, 'y' => 41.0],
-        'AE' => ['name' => 'United Arab Emirates', 'x' => 62.5, 'y' => 44.0],
-        'IL' => ['name' => 'Israel', 'x' => 57.5, 'y' => 40.0],
-        'IN' => ['name' => 'India', 'x' => 68.0, 'y' => 45.0],
-        'PK' => ['name' => 'Pakistan', 'x' => 66.0, 'y' => 41.0],
-        'CN' => ['name' => 'China', 'x' => 75.0, 'y' => 36.0],
-        'JP' => ['name' => 'Japan', 'x' => 84.0, 'y' => 36.0],
-        'KR' => ['name' => 'South Korea', 'x' => 81.0, 'y' => 36.0],
-        'ID' => ['name' => 'Indonesia', 'x' => 77.0, 'y' => 60.0],
-        'SG' => ['name' => 'Singapore', 'x' => 74.5, 'y' => 56.0],
-        'TH' => ['name' => 'Thailand', 'x' => 74.0, 'y' => 48.0],
-        'VN' => ['name' => 'Vietnam', 'x' => 75.5, 'y' => 47.0],
-        'PH' => ['name' => 'Philippines', 'x' => 79.0, 'y' => 49.0],
-        'AU' => ['name' => 'Australia', 'x' => 83.0, 'y' => 70.0],
-        'NZ' => ['name' => 'New Zealand', 'x' => 92.0, 'y' => 78.0],
+    private const COUNTRY_NAMES = [
+        'NL' => 'Netherlands',
+        'BE' => 'Belgium',
+        'DE' => 'Germany',
+        'FR' => 'France',
+        'GB' => 'United Kingdom',
+        'IE' => 'Ireland',
+        'ES' => 'Spain',
+        'PT' => 'Portugal',
+        'IT' => 'Italy',
+        'CH' => 'Switzerland',
+        'AT' => 'Austria',
+        'PL' => 'Poland',
+        'CZ' => 'Czechia',
+        'SE' => 'Sweden',
+        'NO' => 'Norway',
+        'DK' => 'Denmark',
+        'FI' => 'Finland',
+        'UA' => 'Ukraine',
+        'RU' => 'Russia',
+        'TR' => 'Türkiye',
+        'GR' => 'Greece',
+        'RO' => 'Romania',
+        'US' => 'United States',
+        'CA' => 'Canada',
+        'MX' => 'Mexico',
+        'BR' => 'Brazil',
+        'AR' => 'Argentina',
+        'CL' => 'Chile',
+        'CO' => 'Colombia',
+        'ZA' => 'South Africa',
+        'NG' => 'Nigeria',
+        'EG' => 'Egypt',
+        'MA' => 'Morocco',
+        'AE' => 'United Arab Emirates',
+        'IL' => 'Israel',
+        'IN' => 'India',
+        'PK' => 'Pakistan',
+        'CN' => 'China',
+        'JP' => 'Japan',
+        'KR' => 'South Korea',
+        'ID' => 'Indonesia',
+        'SG' => 'Singapore',
+        'TH' => 'Thailand',
+        'VN' => 'Vietnam',
+        'PH' => 'Philippines',
+        'AU' => 'Australia',
+        'NZ' => 'New Zealand',
     ];
 }

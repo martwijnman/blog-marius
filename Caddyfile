@@ -1,0 +1,16 @@
+{
+	{$CADDY_GLOBAL_OPTIONS}
+	frankenphp
+	auto_https off
+	admin off
+	persist_config off
+}
+
+:{$PORT:80} {
+	root /app/public
+	encode zstd br gzip
+
+	php_server {
+		try_files {path} index.php
+	}
+}
