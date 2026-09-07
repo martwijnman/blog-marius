@@ -79,13 +79,12 @@ ENV APP_ENV=production \
 # Fallback-APP_KEY voor als de env var op Vercel leeg is (zie config/app.php).
 RUN php -r 'file_put_contents("/app/.deploy-key", "base64:".base64_encode(random_bytes(32)));'
 
-# Alleen CategorySeeder draaien: DatabaseSeeder roept User::factory() aan en
-# dus fake(), en fakerphp/faker zit in require-dev - die bestaat niet in deze
-# --no-dev build.
+# DatabaseSeeder is Faker-vrij gemaakt zodat hij ook in deze --no-dev build
+# kan draaien: categorieen plus het testaccount.
 RUN mkdir -p database \
     && touch database/database.sqlite \
     && php artisan migrate --force \
-    && php artisan db:seed --force --class="Database\\Seeders\\CategorySeeder"
+    && php artisan db:seed --force
 
 # public/storage -> storage/app/public, anders geeft elke ge-uploade
 # afbeelding een 404.
