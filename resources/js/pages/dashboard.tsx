@@ -510,9 +510,7 @@ export default function Dashboard() {
                                     disabled={bulkAction === ''}
                                     loading={isBulkRunning}
                                     color={
-                                        bulkAction === 'delete'
-                                            ? 'red'
-                                            : 'dark'
+                                        bulkAction === 'delete' ? 'red' : 'dark'
                                     }
                                 >
                                     Apply
@@ -574,12 +572,14 @@ export default function Dashboard() {
                                         Content
                                     </Table.Th>
                                     <Table.Th className="w-36">Slug</Table.Th>
-                                    <Table.Th className="w-28">Status</Table.Th>
-                                    <Table.Th className="w-28">Images</Table.Th>
-                                    <Table.Th className="w-36">
+                                    <Table.Th className="w-24">Status</Table.Th>
+                                    <Table.Th className="w-20 text-center">
+                                        Images
+                                    </Table.Th>
+                                    <Table.Th className="w-28">
                                         Published at
                                     </Table.Th>
-                                    <Table.Th className="w-36 text-center">
+                                    <Table.Th className="w-24 text-center">
                                         Action
                                     </Table.Th>
                                 </Table.Tr>
@@ -596,7 +596,7 @@ export default function Dashboard() {
                                             onClick={() => setReaderPost(post)}
                                         >
                                             <Table.Td
-                                                className="w-10 text-center align-top"
+                                                className="w-10 text-center align-middle"
                                                 onClick={(e) =>
                                                     e.stopPropagation()
                                                 }
@@ -624,22 +624,22 @@ export default function Dashboard() {
                                                     />
                                                 </div>
                                             </Table.Td>
-                                            <Table.Td className="truncate align-top">
+                                            <Table.Td className="truncate align-middle">
                                                 {post.title}
                                             </Table.Td>
-                                            <Table.Td className="truncate align-top">
+                                            <Table.Td className="truncate align-middle">
                                                 {post.excerpt ?? '-'}
                                             </Table.Td>
-                                            <Table.Td className="truncate align-top">
+                                            <Table.Td className="truncate align-middle">
                                                 {post.content}
                                             </Table.Td>
-                                            <Table.Td className="truncate align-top">
+                                            <Table.Td className="truncate align-middle">
                                                 {post.slug}
                                             </Table.Td>
-                                            <Table.Td className="align-top">
+                                            <Table.Td className="align-middle">
                                                 {post.status}
                                             </Table.Td>
-                                            <Table.Td className="align-top">
+                                            <Table.Td className="align-middle">
                                                 {/* Fixed box: without it the
                                                     Swiper stretches the row to
                                                     the images' natural height. */}
@@ -691,13 +691,13 @@ export default function Dashboard() {
                                                         )}
                                                 </div>
                                             </Table.Td>
-                                            <Table.Td className="align-top">
+                                            <Table.Td className="align-middle">
                                                 {post.created_at?.split(
                                                     'T',
                                                 )[0] ?? '-'}
                                             </Table.Td>
                                             <Table.Td
-                                                className="align-top"
+                                                className="align-middle"
                                                 onClick={(e) =>
                                                     e.stopPropagation()
                                                 }
@@ -705,7 +705,7 @@ export default function Dashboard() {
                                                 <Flex
                                                     align="center"
                                                     justify="center"
-                                                    gap={12}
+                                                    gap={10}
                                                     wrap="nowrap"
                                                 >
                                                     <EditPost
@@ -715,14 +715,14 @@ export default function Dashboard() {
                                                     />
                                                     <FaFile
                                                         size={14}
-                                                        className="cursor-pointer text-white"
+                                                        className="cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
                                                         onClick={() =>
                                                             setReaderPost(post)
                                                         }
                                                     />
                                                     <FaTrash
                                                         size={14}
-                                                        className="cursor-pointer text-white"
+                                                        className="cursor-pointer text-muted-foreground transition-colors hover:text-destructive"
                                                         onClick={() =>
                                                             void deletePost(
                                                                 post,
