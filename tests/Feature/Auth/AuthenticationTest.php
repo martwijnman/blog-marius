@@ -4,6 +4,7 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Laravel\Fortify\Features;
 use Tests\TestCase;
@@ -30,6 +31,38 @@ class AuthenticationTest extends TestCase
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('dashboard', absolute: false));
+    }
+
+    public function test_login_rehashes_password_with_empty_bcrypt_rounds(): void
+    {
+        $user = User::factory()->create();
+        $originalHash = $user->password;
+        $originalEnv = $_ENV;
+        $originalServer = $_SERVER;
+
+        try {
+            $_ENV['BCRYPT_ROUNDS'] = '';
+            $_SERVER['BCRYPT_ROUNDS'] = '';
+            $hashing = require config_path('hashing.php');
+            config(['hashing.bcrypt' => $hashing['bcrypt']]);
+            Hash::forgetDrivers();
+
+            $response = $this->post(route('login.store'), [
+                'email' => $user->email,
+                'password' => 'password',
+            ]);
+
+            $this->assertAuthenticatedAs($user);
+            $response->assertRedirect(route('dashboard', absolute: false));
+            $newHash = $user->fresh()->password;
+            $this->assertNotSame($originalHash, $newHash);
+            $this->assertTrue(Hash::check('password', $newHash));
+            $this->assertSame(12, Hash::info($newHash)['options']['cost']);
+        } finally {
+            $_ENV = $originalEnv;
+            $_SERVER = $originalServer;
+            Hash::forgetDrivers();
+        }
     }
 
     public function test_users_with_two_factor_enabled_are_redirected_to_two_factor_challenge()
