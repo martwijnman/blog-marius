@@ -56,7 +56,7 @@ function getImageSrc(path: string) {
         return path;
     }
 
-    return `/storage/${path}`;
+    return `/media/${path}`;
 }
 
 export default function ShowPostPage({ post }: Props) {

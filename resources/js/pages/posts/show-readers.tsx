@@ -243,7 +243,7 @@ export default function ShowPostReaders({ post }: Props) {
             return path;
         }
 
-        return `/storage/${path}`;
+        return `/media/${path}`;
     };
 
     return (

@@ -182,7 +182,7 @@ export default function ShowPost({ post, open, onOpenChange, withTrigger = true 
             return path;
         }
 
-        return `/storage/${path}`;
+        return `/media/${path}`;
     };
 
     return (

@@ -3,7 +3,20 @@
 use App\Http\Controllers\AnalyticsController;
 use App\Models\Post;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+
+/*
+ * Afbeeldingen worden hier uitgeserveerd in plaats van via de
+ * public/storage-symlink. Die symlink is op Windows vaak stuk (aanmaken
+ * vereist adminrechten) en bestaat niet in een verse container, waardoor
+ * elke foto een 404 werd. Deze route leest het bestand gewoon van de disk.
+ */
+Route::get('/media/{path}', function (string $path) {
+    abort_unless(Storage::disk('public')->exists($path), 404);
+
+    return Storage::disk('public')->response($path);
+})->where('path', '.*')->name('media');
 
 Route::inertia('/', 'welcome')->name('home');
 Route::inertia('/archive', 'posts/archive')->name('posts_archive');

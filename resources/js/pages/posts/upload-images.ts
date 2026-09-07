@@ -31,7 +31,7 @@ export const getImageSrc = (path: string) => {
         return path;
     }
 
-    return `/storage/${path}`;
+    return `/media/${path}`;
 };
 
 export async function fetchImages(postId: number): Promise<PostImage[]> {
