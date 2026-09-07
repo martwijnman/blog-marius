@@ -13,6 +13,8 @@ use Inertia\Inertia;
  * elke foto een 404 werd. Deze route leest het bestand gewoon van de disk.
  */
 Route::get('/media/{path}', function (string $path) {
+    // {path} vangt alles inclusief slashes, dus ../ hier expliciet weren.
+    abort_if(str_contains($path, '..'), 404);
     abort_unless(Storage::disk('public')->exists($path), 404);
 
     return Storage::disk('public')->response($path);
