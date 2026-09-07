@@ -1,7 +1,7 @@
 'use client';
 
 import { notifications } from '@mantine/notifications';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -43,6 +43,26 @@ export default function CreatePost({ onSaved, categories }: Props) {
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [fileInputKey, setFileInputKey] = useState(0);
+
+    // createObjectURL hoorde niet in de render thuis: die draaide bij elke
+    // toetsaanslag opnieuw en liet telkens een blob-URL achter die nooit werd
+    // vrijgegeven. Nu wordt er per bestand precies een gemaakt, en opgeruimd
+    // zodra de selectie verandert of het formulier verdwijnt.
+    const previews = useMemo(
+        () =>
+            form.images.map((image) => ({
+                key: `${image.name}-${image.lastModified}`,
+                name: image.name,
+                url: URL.createObjectURL(image),
+            })),
+        [form.images],
+    );
+
+    useEffect(() => {
+        return () => {
+            previews.forEach((preview) => URL.revokeObjectURL(preview.url));
+        };
+    }, [previews]);
 
     const updateForm = (field: keyof PostForm, value: string) => {
         setForm((currentForm) => ({
@@ -132,7 +152,7 @@ export default function CreatePost({ onSaved, categories }: Props) {
 
             <SheetContent
                 side="right"
-                className="w-full max-w-lg p-4 sm:max-w-lg"
+                className="w-full max-w-lg overflow-y-auto p-4 sm:max-w-lg"
             >
                 <SheetTitle>Post a new blog</SheetTitle>
                 <SheetDescription>Make a new blog</SheetDescription>
@@ -243,13 +263,13 @@ export default function CreatePost({ onSaved, categories }: Props) {
                             className="text-sm"
                         />
 
-                        {form.images.length > 0 && (
-                            <div className="grid grid-cols-3 gap-2">
-                                {form.images.map((image) => (
+                        {previews.length > 0 && (
+                            <div className="grid grid-cols-6 gap-2">
+                                {previews.map((preview) => (
                                     <img
-                                        key={`${image.name}-${image.lastModified}`}
-                                        src={URL.createObjectURL(image)}
-                                        alt={image.name}
+                                        key={preview.key}
+                                        src={preview.url}
+                                        alt={preview.name}
                                         className="aspect-square w-full rounded-md object-cover"
                                     />
                                 ))}

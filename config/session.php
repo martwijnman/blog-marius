@@ -36,7 +36,11 @@ return [
     |
     */
 
-    'lifetime' => (int) env('SESSION_LIFETIME', 120),
+    // ?: in plaats van een env()-default, om dezelfde reden als bij 'driver':
+    // een lege waarde casten met (int) geeft 0, en lifetime 0 levert een
+    // sessiecookie met Max-Age=0 op. De browser gooit die direct weg, dus de
+    // gebruiker was elke request opnieuw uitgelogd.
+    'lifetime' => (int) (trim((string) env('SESSION_LIFETIME')) ?: 120),
 
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 
@@ -131,10 +135,8 @@ return [
     |
     */
 
-    'cookie' => env(
-        'SESSION_COOKIE',
-        Str::slug((string) env('APP_NAME', 'laravel')).'-session',
-    ),
+    'cookie' => trim((string) env('SESSION_COOKIE'))
+        ?: Str::slug(trim((string) env('APP_NAME')) ?: 'laravel').'-session',
 
     /*
     |--------------------------------------------------------------------------

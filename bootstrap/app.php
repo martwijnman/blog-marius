@@ -39,14 +39,24 @@ foreach ($names as $name) {
 
     $value = $_SERVER[$name] ?? $_ENV[$name] ?? getenv($name);
 
-    if (! is_string($value) || $value === trim($value)) {
+    if (! is_string($value)) {
         continue;
     }
 
-    if (($trimmed = trim($value)) === '') {
+    $trimmed = trim($value);
+
+    // Een lege waarde is hier hetzelfde als "niet gezet": env() zou anders ''
+    // teruggeven in plaats van de default uit config/, wat stilletjes fout
+    // gaat bij casts. (int) '' is 0, en dat gaf een sessiecookie met
+    // Max-Age=0 die de browser meteen weggooide.
+    if ($trimmed === '') {
         unset($_ENV[$name], $_SERVER[$name]);
         putenv($name);
 
+        continue;
+    }
+
+    if ($trimmed === $value) {
         continue;
     }
 

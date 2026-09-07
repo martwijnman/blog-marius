@@ -146,7 +146,7 @@ export default function EditPost({ post, onSaved, categories }: Props) {
 
             <SheetContent
                 side="right"
-                className="w-full max-w-lg p-4 sm:max-w-lg"
+                className="w-full max-w-lg overflow-y-auto p-4 sm:max-w-lg"
             >
                 <SheetTitle>Edit {post.title}</SheetTitle>
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
