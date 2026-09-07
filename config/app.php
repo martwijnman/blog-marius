@@ -39,7 +39,9 @@ return [
     |
     */
 
-    'debug' => (bool) env('APP_DEBUG', false),
+    // TIJDELIJK AAN om de exception achter de 500 op /login te zien.
+    // Terugzetten op (bool) env('APP_DEBUG', false) zodra we hem hebben.
+    'debug' => true,
 
     /*
     |--------------------------------------------------------------------------
