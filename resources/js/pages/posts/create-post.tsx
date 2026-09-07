@@ -152,138 +152,167 @@ export default function CreatePost({ onSaved, categories }: Props) {
 
             <SheetContent
                 side="right"
-                className="w-full max-w-lg overflow-y-auto p-4 sm:max-w-lg"
+                className="flex w-full max-w-lg flex-col p-4 sm:max-w-lg"
             >
                 <SheetTitle>Post a new blog</SheetTitle>
                 <SheetDescription>Make a new blog</SheetDescription>
 
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                    <div className="grid gap-2">
-                        <Label htmlFor="post-title">Title</Label>
-                        <Input
-                            id="post-title"
-                            value={form.title}
-                            onChange={(event) =>
-                                updateForm('title', event.currentTarget.value)
-                            }
-                            placeholder="Title"
-                            required
-                        />
-                    </div>
+                <form
+                    onSubmit={handleSubmit}
+                    className="flex min-h-0 flex-1 flex-col gap-4"
+                >
+                    {/* Alleen de velden scrollen; de knop hieronder blijft
+                        altijd in beeld, ook met een afbeeldingsvoorbeeld. */}
+                    <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1">
+                        <div className="grid gap-2">
+                            <Label htmlFor="post-title">Title</Label>
+                            <Input
+                                id="post-title"
+                                value={form.title}
+                                onChange={(event) =>
+                                    updateForm(
+                                        'title',
+                                        event.currentTarget.value,
+                                    )
+                                }
+                                placeholder="Title"
+                                required
+                            />
+                        </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="post-slug">Slug</Label>
-                        <Input
-                            id="post-slug"
-                            value={form.slug}
-                            onChange={(event) =>
-                                updateForm('slug', event.currentTarget.value)
-                            }
-                            placeholder="my-first-post"
-                            required
-                        />
-                    </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="post-slug">Slug</Label>
+                            <Input
+                                id="post-slug"
+                                value={form.slug}
+                                onChange={(event) =>
+                                    updateForm(
+                                        'slug',
+                                        event.currentTarget.value,
+                                    )
+                                }
+                                placeholder="my-first-post"
+                                required
+                            />
+                        </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="post-excerpt">Excerpt</Label>
-                        <textarea
-                            id="post-excerpt"
-                            className="min-h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                            value={form.excerpt ?? ''}
-                            onChange={(event) =>
-                                updateForm('excerpt', event.currentTarget.value)
-                            }
-                            placeholder="Short summary"
-                        />
-                    </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="post-excerpt">Excerpt</Label>
+                            <textarea
+                                id="post-excerpt"
+                                className="min-h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                                value={form.excerpt ?? ''}
+                                onChange={(event) =>
+                                    updateForm(
+                                        'excerpt',
+                                        event.currentTarget.value,
+                                    )
+                                }
+                                placeholder="Short summary"
+                            />
+                        </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="post-content">Content</Label>
-                        <textarea
-                            id="post-content"
-                            className="min-h-36 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                            value={form.content}
-                            onChange={(event) =>
-                                updateForm('content', event.currentTarget.value)
-                            }
-                            placeholder="Content"
-                            required
-                        />
-                    </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="post-content">Content</Label>
+                            <textarea
+                                id="post-content"
+                                className="min-h-36 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                                value={form.content}
+                                onChange={(event) =>
+                                    updateForm(
+                                        'content',
+                                        event.currentTarget.value,
+                                    )
+                                }
+                                placeholder="Content"
+                                required
+                            />
+                        </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="post-status">Status</Label>
-                        <select
-                            id="post-status"
-                            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                            value={form.status}
-                            onChange={(event) =>
-                                updateForm('status', event.currentTarget.value)
-                            }
-                        >
-                            <option value="draft">draft</option>
-                            <option value="published">published</option>
-                            <option value="archived">archived</option>
-                        </select>
-                    </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="post-status">Status</Label>
+                            <select
+                                id="post-status"
+                                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                                value={form.status}
+                                onChange={(event) =>
+                                    updateForm(
+                                        'status',
+                                        event.currentTarget.value,
+                                    )
+                                }
+                            >
+                                <option value="draft">draft</option>
+                                <option value="published">published</option>
+                                <option value="archived">archived</option>
+                            </select>
+                        </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="post-category">Category</Label>
-                        <select
-                            id="post-category"
-                            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                            value={form.category_id ?? ''}
-                            onChange={(event) => {
-                                const { value } = event.currentTarget;
+                        <div className="grid gap-2">
+                            <Label htmlFor="post-category">Category</Label>
+                            <select
+                                id="post-category"
+                                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                                value={form.category_id ?? ''}
+                                onChange={(event) => {
+                                    const { value } = event.currentTarget;
 
-                                setForm((currentForm) => ({
-                                    ...currentForm,
-                                    category_id: value ? Number(value) : null,
-                                }));
-                            }}
-                        >
-                            <option value="">No category</option>
-                            {categories.map((category) => (
-                                <option key={category.id} value={category.id}>
-                                    {category.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="post-images">Images</Label>
-                        <input
-                            key={fileInputKey}
-                            id="post-images"
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            onChange={handleImages}
-                            className="text-sm"
-                        />
-
-                        {previews.length > 0 && (
-                            <div className="grid grid-cols-6 gap-2">
-                                {previews.map((preview) => (
-                                    <img
-                                        key={preview.key}
-                                        src={preview.url}
-                                        alt={preview.name}
-                                        className="aspect-square w-full rounded-md object-cover"
-                                    />
+                                    setForm((currentForm) => ({
+                                        ...currentForm,
+                                        category_id: value
+                                            ? Number(value)
+                                            : null,
+                                    }));
+                                }}
+                            >
+                                <option value="">No category</option>
+                                {categories.map((category) => (
+                                    <option
+                                        key={category.id}
+                                        value={category.id}
+                                    >
+                                        {category.name}
+                                    </option>
                                 ))}
-                            </div>
-                        )}
+                            </select>
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="post-images">Images</Label>
+                            <input
+                                key={fileInputKey}
+                                id="post-images"
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={handleImages}
+                                className="text-sm"
+                            />
+
+                            {previews.length > 0 && (
+                                <div className="grid grid-cols-6 gap-2">
+                                    {previews.map((preview) => (
+                                        <img
+                                            key={preview.key}
+                                            src={preview.url}
+                                            alt={preview.name}
+                                            className="aspect-square w-full rounded-md object-cover"
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    {error && (
-                        <p className="text-sm text-destructive">{error}</p>
-                    )}
+                    <div className="flex flex-col gap-2 border-t pt-4">
+                        {error && (
+                            <p className="text-sm text-destructive">{error}</p>
+                        )}
 
-                    <Button type="submit" disabled={isSaving}>
-                        {isSaving ? 'Saving...' : 'Submit'}
-                    </Button>
+                        <Button type="submit" disabled={isSaving}>
+                            {isSaving ? 'Saving...' : 'Submit'}
+                        </Button>
+                    </div>
                 </form>
             </SheetContent>
         </Sheet>

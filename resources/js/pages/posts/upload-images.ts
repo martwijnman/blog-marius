@@ -53,10 +53,42 @@ export async function uploadImages(
     });
 
     if (!response.ok) {
-        throw new Error('Images can not be uploaded');
+        throw new Error(await uploadErrorMessage(response));
     }
 
     return (await response.json()) as PostImage[];
+}
+
+/**
+ * De server weet precies waarom een upload faalt - te groot, verkeerd type,
+ * niet schrijfbaar. Die reden doorgeven in plaats van een generieke melding,
+ * anders is er vanaf de voorkant niets te zien behalve "het lukt niet".
+ */
+async function uploadErrorMessage(response: Response): Promise<string> {
+    try {
+        const body = (await response.json()) as {
+            message?: string;
+            errors?: Record<string, string[]>;
+        };
+
+        const firstError = Object.values(body.errors ?? {})[0]?.[0];
+
+        if (firstError) {
+            return firstError;
+        }
+
+        if (body.message) {
+            return body.message;
+        }
+    } catch {
+        // Geen JSON terug - dan alleen de status.
+    }
+
+    if (response.status === 413) {
+        return 'The image is too large for the server.';
+    }
+
+    return `Images can not be uploaded (HTTP ${response.status})`;
 }
 
 export async function deleteImage(imageId: number): Promise<void> {

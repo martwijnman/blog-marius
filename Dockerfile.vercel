@@ -3,6 +3,11 @@
 FROM dunglas/frankenphp:1-php8.4-bookworm AS base
 
 RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
+    && printf '%s\n' \
+        'upload_max_filesize = 12M' \
+        'post_max_size = 16M' \
+        'memory_limit = 256M' \
+        > "$PHP_INI_DIR/conf.d/zz-uploads.ini" \
     && install-php-extensions \
         intl \
         zip \
