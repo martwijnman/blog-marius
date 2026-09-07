@@ -213,14 +213,14 @@ export default function CreatePost({ onSaved, categories }: Props) {
                             id="post-category"
                             className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
                             value={form.category_id ?? ''}
-                            onChange={(event) =>
+                            onChange={(event) => {
+                                const { value } = event.currentTarget;
+
                                 setForm((currentForm) => ({
                                     ...currentForm,
-                                    category_id: event.currentTarget.value
-                                        ? Number(event.currentTarget.value)
-                                        : null,
-                                }))
-                            }
+                                    category_id: value ? Number(value) : null,
+                                }));
+                            }}
                         >
                             <option value="">No category</option>
                             {categories.map((category) => (

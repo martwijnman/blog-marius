@@ -153,47 +153,55 @@ export default function EditPost({ post, onSaved, categories }: Props) {
                     <TextInput
                         label="Title"
                         value={form.title}
-                        onChange={(event) =>
+                        onChange={(event) => {
+                            const { value } = event.currentTarget;
+
                             setForm((currentForm) => ({
                                 ...currentForm,
-                                title: event.currentTarget.value,
-                            }))
-                        }
+                                title: value,
+                            }));
+                        }}
                         required
                     />
 
                     <TextInput
                         label="Slug"
                         value={form.slug}
-                        onChange={(event) =>
+                        onChange={(event) => {
+                            const { value } = event.currentTarget;
+
                             setForm((currentForm) => ({
                                 ...currentForm,
-                                slug: event.currentTarget.value,
-                            }))
-                        }
+                                slug: value,
+                            }));
+                        }}
                         required
                     />
 
                     <Textarea
                         label="Excerpt"
                         value={form.excerpt ?? ''}
-                        onChange={(event) =>
+                        onChange={(event) => {
+                            const { value } = event.currentTarget;
+
                             setForm((currentForm) => ({
                                 ...currentForm,
-                                excerpt: event.currentTarget.value,
-                            }))
-                        }
+                                excerpt: value,
+                            }));
+                        }}
                     />
 
                     <Textarea
                         label="Content"
                         value={form.content}
-                        onChange={(event) =>
+                        onChange={(event) => {
+                            const { value } = event.currentTarget;
+
                             setForm((currentForm) => ({
                                 ...currentForm,
-                                content: event.currentTarget.value,
-                            }))
-                        }
+                                content: value,
+                            }));
+                        }}
                         minRows={6}
                         required
                     />
