@@ -58,6 +58,62 @@ Route::get('/__boot', function () {
         $lines[] = 'DB FOUT: '.get_class($e).': '.$e->getMessage();
     }
 
+    // ?action=probe: Laravel voert de eerste migratie in een transactie uit,
+    // dus de echte fout wordt overschreven door 25P02. Hier draaien we de
+    // statements los van elkaar, zodat de onderdrukte fout zichtbaar wordt.
+    if (request('action') === 'probe') {
+        $lines[] = str_repeat('=', 40);
+        $lines[] = 'ALLE RELATIES (incl. views/sequences):';
+        try {
+            $rows = \Illuminate\Support\Facades\DB::select(
+                "select n.nspname as schema, c.relname as naam, c.relkind as soort
+                 from pg_class c join pg_namespace n on n.oid = c.relnamespace
+                 where n.nspname not in ('pg_catalog', 'information_schema')
+                   and n.nspname not like 'pg_%'
+                 order by 1, 2"
+            );
+            foreach ($rows as $row) {
+                $lines[] = '  '.$row->schema.'.'.$row->naam.' ['.$row->soort.']';
+            }
+        } catch (\Throwable $e) {
+            $lines[] = '  FOUT: '.$e->getMessage();
+        }
+
+        $lines[] = str_repeat('-', 40);
+        $lines[] = 'search_path / user / rechten:';
+        foreach ([
+            'search_path' => 'show search_path',
+            'current_user' => 'select current_user as v',
+            'current_schema' => 'select current_schema() as v',
+            'create op public' => "select has_schema_privilege(current_user, 'public', 'CREATE') as v",
+        ] as $label => $sql) {
+            try {
+                $r = (array) \Illuminate\Support\Facades\DB::selectOne($sql);
+                $lines[] = '  '.$label.': '.json_encode(array_values($r));
+            } catch (\Throwable $e) {
+                $lines[] = '  '.$label.': FOUT '.$e->getMessage();
+            }
+        }
+
+        $lines[] = str_repeat('-', 40);
+        $lines[] = 'losse statements (elk in eigen try/catch):';
+        $statements = [
+            'drop probe' => 'drop table if exists "__probe_users"',
+            'create probe' => 'create table "__probe_users" ("id" bigserial not null primary key, "email" varchar(255) not null)',
+            'unique probe' => 'alter table "__probe_users" add constraint "__probe_users_email_unique" unique ("email")',
+            'opruimen' => 'drop table if exists "__probe_users"',
+            'create users (echte statement)' => 'create table "users" ("id" bigserial not null primary key, "name" varchar(255) not null, "email" varchar(255) not null, "email_verified_at" timestamp(0) without time zone null, "password" varchar(255) not null, "remember_token" varchar(100) null, "created_at" timestamp(0) without time zone null, "updated_at" timestamp(0) without time zone null)',
+        ];
+        foreach ($statements as $label => $sql) {
+            try {
+                \Illuminate\Support\Facades\DB::statement($sql);
+                $lines[] = '  OK   '.$label;
+            } catch (\Throwable $e) {
+                $lines[] = '  FOUT '.$label.': '.$e->getMessage();
+            }
+        }
+    }
+
     $lines[] = str_repeat('=', 40);
     $lines[] = is_readable('/tmp/boot.log') ? (string) file_get_contents('/tmp/boot.log') : 'geen /tmp/boot.log';
 
