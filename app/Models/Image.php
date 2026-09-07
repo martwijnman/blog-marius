@@ -51,15 +51,22 @@ class Image extends Model
         fwrite($stream, $bytes);
         rewind($stream);
 
+        // bindParam bindt bij referentie en PDO vervangt de variabele tijdens
+        // execute() door de uitgelezen string. Daarom een aparte variabele
+        // binden, zodat $stream de resource houdt die we moeten sluiten.
+        $binding = $stream;
+
         try {
             $statement = $connection->getPdo()->prepare(
                 'update images set contents = :contents where id = :id'
             );
-            $statement->bindParam(':contents', $stream, \PDO::PARAM_LOB);
+            $statement->bindParam(':contents', $binding, \PDO::PARAM_LOB);
             $statement->bindValue(':id', $image->getKey(), \PDO::PARAM_INT);
             $statement->execute();
         } finally {
-            fclose($stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
         }
 
         return $image;
