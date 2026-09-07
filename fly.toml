@@ -1,0 +1,46 @@
+# Fly.io: draait Dockerfile.vercel zoals hij is, met een volume voor de
+# dingen die een deploy moeten overleven.
+#
+# Eenmalig aanmaken:
+#   fly launch --no-deploy --copy-config
+#   fly volumes create blog_data --size 1
+#   fly secrets set APP_KEY="base64:..."   # dezelfde als in je lokale .env
+#   fly deploy
+
+app = "blog-marius"
+primary_region = "ams"
+
+[build]
+  dockerfile = "Dockerfile.vercel"
+
+[env]
+  APP_ENV = "production"
+  APP_DEBUG = "false"
+  LOG_CHANNEL = "stderr"
+
+  # Database en storage staan op het volume, niet in de image.
+  DB_CONNECTION = "sqlite"
+  DB_DATABASE = "/mnt/data/database/database.sqlite"
+  APP_STORAGE_PATH = "/mnt/data/storage"
+
+  SESSION_DRIVER = "database"
+  CACHE_STORE = "database"
+  QUEUE_CONNECTION = "sync"
+
+[[mounts]]
+  source = "blog_data"
+  destination = "/mnt/data"
+
+[http_service]
+  internal_port = 80
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  # Eén machine: SQLite is één bestand op één volume en verdraagt geen
+  # tweede container die er tegelijk in schrijft. Dat was precies het
+  # probleem op Vercel.
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
