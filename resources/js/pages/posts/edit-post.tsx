@@ -8,7 +8,6 @@ import {
     Sheet,
     SheetContent,
     SheetTitle,
-    SheetTrigger,
 } from '@/components/ui/sheet';
 import type { Category } from '@/lib/blog';
 import type { Post } from '../dashboard';
@@ -46,6 +45,11 @@ export default function EditPost({ post, onSaved, categories }: Props) {
     const [images, setImages] = useState<PostImage[]>([]);
     const [newImages, setNewImages] = useState<File[]>([]);
     const [fileInputKey, setFileInputKey] = useState(0);
+
+    // Zie create-post: controlled, en het tandwiel is nu een echte knop.
+    // Als los <svg> was hij niet met het toetsenbord te bereiken en op een
+    // telefoon nauwelijks te raken.
+    const [isOpen, setIsOpen] = useState(false);
 
     async function loadImages() {
         try {
@@ -159,10 +163,15 @@ export default function EditPost({ post, onSaved, categories }: Props) {
     };
 
     return (
-        <Sheet>
-            <SheetTrigger asChild>
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <button
+                type="button"
+                onClick={() => setIsOpen(true)}
+                aria-label={`Edit ${post.title}`}
+                className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
                 <FaCog size={14} />
-            </SheetTrigger>
+            </button>
 
             <SheetContent
                 side="right"

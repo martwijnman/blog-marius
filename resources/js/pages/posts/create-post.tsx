@@ -10,7 +10,6 @@ import {
     SheetContent,
     SheetDescription,
     SheetTitle,
-    SheetTrigger,
 } from '@/components/ui/sheet';
 import type { Category } from '@/lib/blog';
 import type { Post } from '../dashboard';
@@ -43,6 +42,13 @@ export default function CreatePost({ onSaved, categories }: Props) {
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [fileInputKey, setFileInputKey] = useState(0);
+
+    // Het paneel is bewust controlled. Met SheetTrigger asChild hangt het
+    // openen ervan af of het kind-component de props en ref van Radix netjes
+    // doorgeeft; gaat dat mis, dan gebeurt er bij een klik helemaal niets en
+    // is er ook geen foutmelding. Een gewone knop met eigen state kan niet
+    // stilvallen.
+    const [isOpen, setIsOpen] = useState(false);
 
     // createObjectURL hoorde niet in de render thuis: die draaide bij elke
     // toetsaanslag opnieuw en liet telkens een blob-URL achter die nooit werd
@@ -146,6 +152,7 @@ export default function CreatePost({ onSaved, categories }: Props) {
 
             setForm(initialForm);
             setFileInputKey((current) => current + 1);
+            setIsOpen(false);
             await onSaved?.();
         } catch (submitError: unknown) {
             const message =
@@ -166,10 +173,10 @@ export default function CreatePost({ onSaved, categories }: Props) {
     };
 
     return (
-        <Sheet>
-            <SheetTrigger asChild>
-                <Button type="button">+ Create a blog</Button>
-            </SheetTrigger>
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <Button type="button" onClick={() => setIsOpen(true)}>
+                + Create a blog
+            </Button>
 
             <SheetContent
                 side="right"

@@ -684,7 +684,7 @@ export default function Dashboard() {
                             stickyHeader
                             striped="odd"
                             highlightOnHover
-                            verticalSpacing={6}
+                            verticalSpacing={8}
                             horizontalSpacing="xs"
                             fz="xs"
                             withTableBorder
@@ -714,24 +714,14 @@ export default function Dashboard() {
                                             />
                                         </div>
                                     </Table.Th>
-                                    <Table.Th className="w-28">Title</Table.Th>
-                                    <Table.Th className="w-36">
-                                        Excerpt
-                                    </Table.Th>
-                                    <Table.Th className="w-36">
-                                        Content
-                                    </Table.Th>
-                                    <Table.Th className="w-36">Slug</Table.Th>
-                                    <Table.Th className="w-24">Status</Table.Th>
-                                    <Table.Th className="w-20 text-center">
-                                        Images
-                                    </Table.Th>
-                                    <Table.Th className="w-28">
-                                        Published at
-                                    </Table.Th>
-                                    <Table.Th className="w-24 text-center">
-                                        Action
-                                    </Table.Th>
+                                    <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-28">Title</Table.Th>
+                                    <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-36">Excerpt</Table.Th>
+                                    <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-36">Content</Table.Th>
+                                    <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-36">Slug</Table.Th>
+                                    <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-24">Status</Table.Th>
+                                    <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-20 text-center">Images</Table.Th>
+                                    <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-28">Published at</Table.Th>
+                                    <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-24 text-center">Action</Table.Th>
                                 </Table.Tr>
                             </Table.Thead>
                             <Table.Tbody>
@@ -774,26 +764,38 @@ export default function Dashboard() {
                                                     />
                                                 </div>
                                             </Table.Td>
-                                            <Table.Td className="truncate align-middle">
+                                            <Table.Td className="truncate align-middle font-medium text-foreground">
                                                 {post.title}
                                             </Table.Td>
-                                            <Table.Td className="truncate align-middle">
+                                            <Table.Td className="truncate align-middle text-muted-foreground">
                                                 {post.excerpt ?? '-'}
                                             </Table.Td>
-                                            <Table.Td className="truncate align-middle">
+                                            <Table.Td className="truncate align-middle text-muted-foreground">
                                                 {post.content}
                                             </Table.Td>
-                                            <Table.Td className="truncate align-middle">
+                                            <Table.Td className="truncate align-middle font-mono text-[11px] text-muted-foreground">
                                                 {post.slug}
                                             </Table.Td>
                                             <Table.Td className="align-middle">
-                                                {post.status}
+                                                <span
+                                                    className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                                                        post.status ===
+                                                        'published'
+                                                            ? 'bg-green-500/15 text-green-600 dark:text-green-400'
+                                                            : post.status ===
+                                                                'draft'
+                                                              ? 'bg-yellow-500/15 text-yellow-600 dark:text-yellow-400'
+                                                              : 'bg-neutral-500/15 text-neutral-500'
+                                                    }`}
+                                                >
+                                                    {post.status}
+                                                </span>
                                             </Table.Td>
                                             <Table.Td className="align-middle">
                                                 {/* Fixed box: without it the
                                                     Swiper stretches the row to
                                                     the images' natural height. */}
-                                                <div className="h-10 w-16 overflow-hidden rounded">
+                                                <div className="h-10 w-16 overflow-hidden rounded-md border border-dashed border-sidebar-border/70">
                                                     {isLoadingImages && (
                                                         <div className="flex h-full items-center justify-center text-xs text-neutral-500">
                                                             Loading...
@@ -841,7 +843,7 @@ export default function Dashboard() {
                                                         )}
                                                 </div>
                                             </Table.Td>
-                                            <Table.Td className="align-middle">
+                                            <Table.Td className="align-middle text-muted-foreground tabular-nums">
                                                 {post.created_at?.split(
                                                     'T',
                                                 )[0] ?? '-'}
@@ -855,7 +857,7 @@ export default function Dashboard() {
                                                 <Flex
                                                     align="center"
                                                     justify="center"
-                                                    gap={10}
+                                                    gap={2}
                                                     wrap="nowrap"
                                                 >
                                                     <EditPost
@@ -863,22 +865,28 @@ export default function Dashboard() {
                                                         onSaved={loadPosts}
                                                         categories={categories}
                                                     />
-                                                    <FaFile
-                                                        size={14}
-                                                        className="cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
+                                                    <button
+                                                        type="button"
+                                                        aria-label={`Read ${post.title}`}
                                                         onClick={() =>
                                                             setReaderPost(post)
                                                         }
-                                                    />
-                                                    <FaTrash
-                                                        size={14}
-                                                        className="cursor-pointer text-muted-foreground transition-colors hover:text-destructive"
+                                                        className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                                                    >
+                                                        <FaFile size={14} />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        aria-label={`Delete ${post.title}`}
                                                         onClick={() =>
                                                             void deletePost(
                                                                 post,
                                                             )
                                                         }
-                                                    />
+                                                        className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                                                    >
+                                                        <FaTrash size={14} />
+                                                    </button>
                                                 </Flex>
                                             </Table.Td>
                                         </Table.Tr>
