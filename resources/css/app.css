@@ -137,6 +137,29 @@
         @apply border-border;
     }
 
+    /*
+     * Een dialoog of zijpaneel zet de pagina erachter op slot en haalt daarmee
+     * de verticale scrollbalk weg. De inhoud schuift dan een scrollbalkbreedte
+     * opzij, en bij het sluiten weer terug - dat is de schok die je ziet als
+     * je een blog opent. scrollbar-gutter houdt die ruimte altijd
+     * gereserveerd, dus er valt niets meer te verspringen.
+     */
+    html {
+        scrollbar-gutter: stable;
+    }
+
+    /*
+     * Radix compenseert de weggevallen scrollbalk zelf met padding-right op
+     * body. Met de gereserveerde gutter hierboven zou dat een tweede
+     * verspringing opleveren, precies de andere kant op. Een van de twee moet
+     * het doen, en de gutter is de enige die ook werkt voor onderdelen die
+     * met position:fixed buiten die padding vallen - zoals de zijbalk.
+     */
+    body[data-scroll-locked] {
+        margin-right: 0 !important;
+        padding-right: 0 !important;
+    }
+
     body {
         @apply bg-background text-foreground;
     }
