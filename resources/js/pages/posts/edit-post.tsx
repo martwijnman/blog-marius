@@ -17,6 +17,7 @@ import {
     fetchImages,
     getImageSrc,
     mergeFiles,
+    fileKey,
     uploadImages,
 } from './upload-images';
 import type { PostImage } from './upload-images';
@@ -65,18 +66,26 @@ export default function EditPost({ post, onSaved, categories }: Props) {
         void loadImages();
     }, [post.id]);
 
+    /**
+     * event.currentTarget.files is een LIVE FileList: hij hoort bij het input-
+     * element en loopt leeg zodra we `value` wissen. React voert de updater van
+     * setState pas later uit, dus tegen die tijd zat er niets meer in en werd
+     * er geen enkele foto toegevoegd - op mobiel viel dat het hardst op. Eerst
+     * kopieren naar een echte array, daarna pas het veld leegmaken.
+     */
     const handleImages = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const files = event.currentTarget.files;
+        const input = event.currentTarget;
+        const files = Array.from(input.files ?? []);
 
-        if (!files) {
+        // Leegmaken, anders vuurt change niet als je hetzelfde bestand
+        // nogmaals kiest.
+        input.value = '';
+
+        if (files.length === 0) {
             return;
         }
 
         setNewImages((current) => mergeFiles(current, files));
-
-        // Leegmaken, anders vuurt change niet als je hetzelfde bestand
-        // nogmaals kiest.
-        event.currentTarget.value = '';
     };
 
     const removeNewImage = (index: number) => {
@@ -301,7 +310,7 @@ export default function EditPost({ post, onSaved, categories }: Props) {
                                 <ul className="flex flex-col gap-1 text-sm text-muted-foreground">
                                     {newImages.map((file, index) => (
                                         <li
-                                            key={`${file.name}-${file.lastModified}`}
+                                            key={fileKey(file)}
                                             className="flex items-center justify-between gap-2"
                                         >
                                             <span className="truncate">

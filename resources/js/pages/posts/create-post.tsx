@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/sheet';
 import type { Category } from '@/lib/blog';
 import type { Post } from '../dashboard';
-import { mergeFiles, uploadImages } from './upload-images';
+import { fileKey, mergeFiles, uploadImages } from './upload-images';
 
 type PostForm = Pick<
     Post,
@@ -51,7 +51,7 @@ export default function CreatePost({ onSaved, categories }: Props) {
     const previews = useMemo(
         () =>
             form.images.map((image) => ({
-                key: `${image.name}-${image.lastModified}`,
+                key: fileKey(image),
                 name: image.name,
                 url: URL.createObjectURL(image),
             })),
@@ -71,10 +71,22 @@ export default function CreatePost({ onSaved, categories }: Props) {
         }));
     };
 
+    /**
+     * event.currentTarget.files is een LIVE FileList: hij hoort bij het input-
+     * element en loopt leeg zodra we `value` wissen. React voert de updater van
+     * setState pas later uit, dus tegen die tijd zat er niets meer in en werd
+     * er geen enkele foto toegevoegd - op mobiel viel dat het hardst op. Eerst
+     * kopieren naar een echte array, daarna pas het veld leegmaken.
+     */
     const handleImages = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const files = event.currentTarget.files;
+        const input = event.currentTarget;
+        const files = Array.from(input.files ?? []);
 
-        if (!files) {
+        // Leegmaken, anders vuurt change niet als je hetzelfde bestand
+        // nogmaals kiest.
+        input.value = '';
+
+        if (files.length === 0) {
             return;
         }
 
@@ -82,17 +94,13 @@ export default function CreatePost({ onSaved, categories }: Props) {
             ...current,
             images: mergeFiles(current.images, files),
         }));
-
-        // Leegmaken, anders vuurt change niet als je hetzelfde bestand
-        // nogmaals kiest.
-        event.currentTarget.value = '';
     };
 
     const removeImage = (key: string) => {
         setForm((current) => ({
             ...current,
             images: current.images.filter(
-                (image) => `${image.name}-${image.lastModified}` !== key,
+                (image) => fileKey(image) !== key,
             ),
         }));
     };

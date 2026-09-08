@@ -375,7 +375,7 @@ export default function Dashboard() {
         <>
             <Head title="Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="flex justify-between">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
                         <div className="flex items-center rounded-xl border p-5">
                             <FaPen size={23} />
@@ -393,29 +393,29 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-4">
-                    <div className="rounded-xl border border-sidebar-border/70 bg-background p-5">
-                        <div className="flex items-center gap-4">
-                            <FaFile className="h-14 w-14 rounded-2xl bg-blue-500/20 p-3 text-blue-400 shadow-[0_0_20px_rgba(59,130,246,0.45)] ring-2 ring-blue-500/40" />
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 xl:grid-cols-4">
+                    <div className="rounded-xl border border-sidebar-border/70 bg-background p-4 md:p-5">
+                        <div className="flex items-center gap-3 md:gap-4">
+                            <FaFile className="h-11 w-11 rounded-2xl md:h-14 md:w-14 bg-blue-500/20 p-2.5 md:p-3 text-blue-400 shadow-[0_0_20px_rgba(59,130,246,0.45)] ring-2 ring-blue-500/40" />
                             <div>
                                 <p className="text-sm text-gray-400">
                                     Total Posts
                                 </p>
-                                <h2 className="text-3xl font-bold">
+                                <h2 className="text-2xl font-bold md:text-3xl">
                                     {posts.length}
                                 </h2>
                             </div>
                         </div>
                     </div>
 
-                    <div className="rounded-xl border border-sidebar-border/70 bg-background p-5">
-                        <div className="flex items-center gap-4">
-                            <FaCircle className="h-14 w-14 rounded-2xl bg-green-500/20 p-3 text-green-400 shadow-[0_0_20px_rgba(34,197,94,0.45)] ring-2 ring-green-500/40" />
+                    <div className="rounded-xl border border-sidebar-border/70 bg-background p-4 md:p-5">
+                        <div className="flex items-center gap-3 md:gap-4">
+                            <FaCircle className="h-11 w-11 rounded-2xl md:h-14 md:w-14 bg-green-500/20 p-2.5 md:p-3 text-green-400 shadow-[0_0_20px_rgba(34,197,94,0.45)] ring-2 ring-green-500/40" />
                             <div>
                                 <p className="text-sm text-gray-400">
                                     Published
                                 </p>
-                                <h2 className="text-3xl font-bold">
+                                <h2 className="text-2xl font-bold md:text-3xl">
                                     {
                                         posts.filter(
                                             (post) =>
@@ -427,12 +427,12 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    <div className="rounded-xl border border-sidebar-border/70 bg-background p-5">
-                        <div className="flex items-center gap-4">
-                            <FaPen className="h-14 w-14 rounded-2xl bg-yellow-500/20 p-3 text-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.45)] ring-2 ring-yellow-500/40" />
+                    <div className="rounded-xl border border-sidebar-border/70 bg-background p-4 md:p-5">
+                        <div className="flex items-center gap-3 md:gap-4">
+                            <FaPen className="h-11 w-11 rounded-2xl md:h-14 md:w-14 bg-yellow-500/20 p-2.5 md:p-3 text-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.45)] ring-2 ring-yellow-500/40" />
                             <div>
                                 <p className="text-sm text-gray-400">Drafts</p>
-                                <h2 className="text-3xl font-bold">
+                                <h2 className="text-2xl font-bold md:text-3xl">
                                     {
                                         posts.filter(
                                             (post) => post.status === 'draft',
@@ -443,14 +443,14 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    <div className="rounded-xl border border-sidebar-border/70 bg-background p-5">
-                        <div className="flex items-center gap-4">
-                            <FaComment className="h-14 w-14 rounded-2xl bg-purple-500/20 p-3 text-purple-400 shadow-[0_0_20px_rgba(192,132,252,0.45)] ring-2 ring-purple-500/40" />
+                    <div className="rounded-xl border border-sidebar-border/70 bg-background p-4 md:p-5">
+                        <div className="flex items-center gap-3 md:gap-4">
+                            <FaComment className="h-11 w-11 rounded-2xl md:h-14 md:w-14 bg-purple-500/20 p-2.5 md:p-3 text-purple-400 shadow-[0_0_20px_rgba(192,132,252,0.45)] ring-2 ring-purple-500/40" />
                             <div>
                                 <p className="text-sm text-gray-400">
                                     Comments
                                 </p>
-                                <h2 className="text-3xl font-bold">0</h2>
+                                <h2 className="text-2xl font-bold md:text-3xl">0</h2>
                             </div>
                         </div>
                     </div>
@@ -458,9 +458,10 @@ export default function Dashboard() {
 
                 <div className="relative overflow-hidden rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border">
                     <div className="flex flex-col gap-4">
-                        <div className="flex w-full flex-row items-center justify-between">
-                            <div className="flex w-[400px] flex-row justify-between gap-4">
+                        <div className="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                            <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-[400px]">
                                 <TextInput
+                                    className="w-full"
                                     placeholder="Search blog..."
                                     value={search}
                                     onChange={(e) => {
@@ -469,14 +470,16 @@ export default function Dashboard() {
                                     }}
                                 />
                                 <MultiSelect
+                                    className="w-full"
                                     placeholder="Choose status"
                                     data={['published', 'draft', 'archived']}
                                     value={statusQuery ? [statusQuery] : []}
                                     onChange={handleStatusChange}
                                 />
                             </div>
-                            <div className="flex flex-row">
+                            <div className="flex w-full flex-row lg:w-auto">
                                 <MultiSelect
+                                    className="w-full"
                                     placeholder="Sort"
                                     data={['Date', 'Alphabet', 'Views']}
                                     value={sortQuery ? [sortQuery] : []}
@@ -486,7 +489,7 @@ export default function Dashboard() {
                         </div>
 
                         {selectedPosts.length > 0 && (
-                            <div className="flex flex-row items-center gap-3 rounded-lg border border-sidebar-border/70 bg-background p-3">
+                            <div className="flex flex-wrap items-center gap-3 rounded-lg border border-sidebar-border/70 bg-background p-3">
                                 <span className="text-sm text-gray-400">
                                     {selectedPosts.length} selected
                                 </span>
@@ -530,6 +533,153 @@ export default function Dashboard() {
                             </div>
                         )}
 
+                        {/* Negen kolommen passen niet op een telefoon. Onder
+                            md tonen we dezelfde posts als kaarten, met
+                            tapdoelen die groot genoeg zijn voor een duim. */}
+                        <ul className="flex flex-col gap-3 md:hidden">
+                            {paginatedPosts.map((post) => {
+                                const postImages =
+                                    imagesByPostId[post.id] ?? [];
+                                const cover = postImages[0];
+
+                                return (
+                                    <li
+                                        key={post.id}
+                                        className="rounded-xl border border-sidebar-border/70 bg-background p-3"
+                                    >
+                                        <div className="flex items-start gap-3">
+                                            <Checkbox
+                                                size="sm"
+                                                className="mt-1"
+                                                checked={selectedPosts.includes(
+                                                    post.id,
+                                                )}
+                                                onChange={(event) =>
+                                                    handleSelect(
+                                                        post.id,
+                                                        event.currentTarget
+                                                            .checked,
+                                                    )
+                                                }
+                                                aria-label={`Select ${post.title}`}
+                                            />
+
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setReaderPost(post)
+                                                }
+                                                className="flex min-w-0 flex-1 items-start gap-3 text-left"
+                                            >
+                                                <div className="h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
+                                                    {cover ? (
+                                                        <img
+                                                            src={getImageSrc(
+                                                                cover.path,
+                                                            )}
+                                                            alt=""
+                                                            className="h-full w-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="flex h-full items-center justify-center text-neutral-500">
+                                                            <ImageIcon className="size-5" />
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="truncate font-medium">
+                                                        {post.title}
+                                                    </p>
+                                                    <p className="line-clamp-2 text-xs text-muted-foreground">
+                                                        {post.excerpt ??
+                                                            post.content}
+                                                    </p>
+                                                    <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                                                        <span
+                                                            className={`rounded-full px-2 py-0.5 text-[11px] ${
+                                                                post.status ===
+                                                                'published'
+                                                                    ? 'bg-green-500/15 text-green-500'
+                                                                    : post.status ===
+                                                                        'draft'
+                                                                      ? 'bg-yellow-500/15 text-yellow-500'
+                                                                      : 'bg-neutral-500/15 text-neutral-400'
+                                                            }`}
+                                                        >
+                                                            {post.status}
+                                                        </span>
+                                                        <span>
+                                                            {post.created_at?.split(
+                                                                'T',
+                                                            )[0] ?? '-'}
+                                                        </span>
+                                                        {postImages.length >
+                                                            0 && (
+                                                            <span>
+                                                                {
+                                                                    postImages.length
+                                                                }{' '}
+                                                                {postImages.length ===
+                                                                1
+                                                                    ? 'image'
+                                                                    : 'images'}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        </div>
+
+                                        <div className="mt-3 flex items-center justify-end gap-1 border-t border-sidebar-border/70 pt-2">
+                                            <div className="flex h-10 w-10 items-center justify-center">
+                                                <EditPost
+                                                    post={post}
+                                                    onSaved={loadPosts}
+                                                    categories={categories}
+                                                />
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setReaderPost(post)
+                                                }
+                                                aria-label={`Read ${post.title}`}
+                                                className="flex h-10 w-10 items-center justify-center text-muted-foreground"
+                                            >
+                                                <FaFile size={16} />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    void deletePost(post)
+                                                }
+                                                aria-label={`Delete ${post.title}`}
+                                                className="flex h-10 w-10 items-center justify-center text-muted-foreground"
+                                            >
+                                                <FaTrash size={16} />
+                                            </button>
+                                        </div>
+                                    </li>
+                                );
+                            })}
+
+                            {!isLoading && paginatedPosts.length === 0 && (
+                                <li className="rounded-xl border border-sidebar-border/70 py-10 text-center text-sm text-muted-foreground">
+                                    {posts.length === 0
+                                        ? 'No posts yet.'
+                                        : 'No posts match your filters.'}
+                                </li>
+                            )}
+
+                            {isLoading && (
+                                <li className="rounded-xl border border-sidebar-border/70 py-10 text-center text-sm text-muted-foreground">
+                                    Loading posts...
+                                </li>
+                            )}
+                        </ul>
+
+                        <div className="hidden overflow-x-auto md:block">
                         <Table
                             stickyHeader
                             striped="odd"
@@ -758,9 +908,10 @@ export default function Dashboard() {
                                 )}
                             </Table.Tbody>
                         </Table>
+                        </div>
 
                         {!isLoading && filteredPosts.length > 0 && (
-                            <div className="flex flex-row items-center justify-between gap-4">
+                            <div className="flex flex-col-reverse items-center justify-between gap-4 sm:flex-row">
                                 <div className="flex items-center gap-2 text-sm text-gray-400">
                                     <span>
                                         {(currentPage - 1) * pageSize + 1}–

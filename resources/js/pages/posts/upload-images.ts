@@ -9,9 +9,17 @@ export interface PostImage {
  * alleen meerdere foto's kon toevoegen als je ze in een keer selecteerde.
  * Nieuwe bestanden worden nu toegevoegd, met dubbele eruit.
  */
+/**
+ * Sleutel van een gekozen bestand. Twee foto's die vlak na elkaar met de
+ * camera zijn gemaakt kunnen dezelfde naam en lastModified hebben, dus de
+ * grootte hoort erbij - anders vallen ze in de preview op dezelfde React-key
+ * en verwijdert het kruisje de verkeerde foto.
+ */
+export const fileKey = (file: File) =>
+    `${file.name}-${file.size}-${file.lastModified}`;
+
 export function mergeFiles(current: File[], added: FileList | File[]): File[] {
-    const identity = (file: File) =>
-        `${file.name}-${file.size}-${file.lastModified}`;
+    const identity = fileKey;
 
     const seen = new Set(current.map(identity));
     const merged = [...current];
