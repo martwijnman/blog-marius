@@ -692,7 +692,7 @@ export default function Dashboard() {
                             <Table.Thead>
                                 <Table.Tr p="xs">
                                     <Table.Th
-                                        className="w-10 text-center"
+                                        className="w-10"
                                         onClick={(e) => e.stopPropagation()}
                                     >
                                         <div
@@ -718,9 +718,9 @@ export default function Dashboard() {
                                     <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-36">Content</Table.Th>
                                     <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-36">Slug</Table.Th>
                                     <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-24">Status</Table.Th>
-                                    <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-20 text-center">Images</Table.Th>
+                                    <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-20"><div className="flex justify-center">Images</div></Table.Th>
                                     <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-28">Published at</Table.Th>
-                                    <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-32 text-center">Action</Table.Th>
+                                    <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-32"><div className="flex justify-center">Action</div></Table.Th>
                                 </Table.Tr>
                             </Table.Thead>
                             <Table.Tbody>
@@ -790,11 +790,11 @@ export default function Dashboard() {
                                                     {post.status}
                                                 </span>
                                             </Table.Td>
-                                            <Table.Td className="align-middle">
+                                            <Table.Td className="w-20 align-middle">
                                                 {/* Fixed box: without it the
                                                     Swiper stretches the row to
                                                     the images' natural height. */}
-                                                <div className="h-10 w-16 overflow-hidden rounded-md border border-dashed border-sidebar-border/70">
+                                                <div className="mx-auto h-10 w-16 overflow-hidden rounded-md border border-dashed border-sidebar-border/70">
                                                     {isLoadingImages && (
                                                         <div className="flex h-full items-center justify-center text-xs text-neutral-500">
                                                             Loading...
