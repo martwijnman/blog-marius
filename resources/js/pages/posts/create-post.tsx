@@ -139,15 +139,31 @@ export default function CreatePost({ onSaved, categories }: Props) {
 
             const createdPost = (await response.json()) as Post;
 
+            // De blog staat er nu al. Gaan de afbeeldingen alsnog mis, dan is
+            // dat een aparte melding: anders leest een rode toast als "de
+            // blog is niet opgeslagen" terwijl hij er wel degelijk staat, en
+            // blijft onzichtbaar waarom de foto's niet meekwamen.
+            let imageError: string | null = null;
+
             if (images.length > 0) {
-                await uploadImages(createdPost.id, images);
+                try {
+                    await uploadImages(createdPost.id, images);
+                } catch (uploadError: unknown) {
+                    imageError =
+                        uploadError instanceof Error
+                            ? uploadError.message
+                            : 'Unknown error';
+                }
             }
 
             notifications.show({
                 id: 'create-post-result',
-                title: 'Blog posted',
-                message: 'The blog has been saved.',
-                color: 'green',
+                title: imageError ? 'Blog saved without images' : 'Blog posted',
+                message: imageError
+                    ? `The blog has been saved, but the images failed: ${imageError}`
+                    : 'The blog has been saved.',
+                color: imageError ? 'yellow' : 'green',
+                autoClose: imageError ? false : undefined,
             });
 
             setForm(initialForm);

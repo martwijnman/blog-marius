@@ -4,7 +4,6 @@ import { Head } from '@inertiajs/react';
 import {
     Button,
     Checkbox,
-    Flex,
     MultiSelect,
     Pagination,
     Select,
@@ -721,7 +720,7 @@ export default function Dashboard() {
                                     <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-24">Status</Table.Th>
                                     <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-20 text-center">Images</Table.Th>
                                     <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-28">Published at</Table.Th>
-                                    <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-24 text-center">Action</Table.Th>
+                                    <Table.Th className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase w-32 text-center">Action</Table.Th>
                                 </Table.Tr>
                             </Table.Thead>
                             <Table.Tbody>
@@ -849,17 +848,12 @@ export default function Dashboard() {
                                                 )[0] ?? '-'}
                                             </Table.Td>
                                             <Table.Td
-                                                className="align-middle"
+                                                className="w-32 align-middle"
                                                 onClick={(e) =>
                                                     e.stopPropagation()
                                                 }
                                             >
-                                                <Flex
-                                                    align="center"
-                                                    justify="center"
-                                                    gap={2}
-                                                    wrap="nowrap"
-                                                >
+                                                <div className="flex flex-nowrap items-center justify-center gap-1">
                                                     <EditPost
                                                         post={post}
                                                         onSaved={loadPosts}
@@ -871,7 +865,7 @@ export default function Dashboard() {
                                                         onClick={() =>
                                                             setReaderPost(post)
                                                         }
-                                                        className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                                                        className="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                                                     >
                                                         <FaFile size={14} />
                                                     </button>
@@ -883,11 +877,11 @@ export default function Dashboard() {
                                                                 post,
                                                             )
                                                         }
-                                                        className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                                                        className="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                                                     >
                                                         <FaTrash size={14} />
                                                     </button>
-                                                </Flex>
+                                                </div>
                                             </Table.Td>
                                         </Table.Tr>
                                     );

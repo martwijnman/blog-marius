@@ -168,7 +168,7 @@ export default function EditPost({ post, onSaved, categories }: Props) {
                 type="button"
                 onClick={() => setIsOpen(true)}
                 aria-label={`Edit ${post.title}`}
-                className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                className="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             >
                 <FaCog size={14} />
             </button>
