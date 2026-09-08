@@ -57,7 +57,62 @@ export interface Post {
     category_id: number | null;
     category?: Category | null;
     created_at: string | null;
+    views?: number | null;
+    likes?: number | null;
 }
+
+/**
+ * Sorteeropties. 'Views' stond wel in de lijst maar had geen implementatie:
+ * de comparator viel door naar 0 en er gebeurde niets. Elke optie hieronder
+ * heeft nu een eigen comparator, en de richting staat in de naam zodat je
+ * niet hoeft te raden of 'Date' nu oud of nieuw bovenaan zet.
+ */
+const SORT_OPTIONS = [
+    {
+        group: 'Date',
+        items: [
+            { value: 'date-desc', label: 'Newest first' },
+            { value: 'date-asc', label: 'Oldest first' },
+        ],
+    },
+    {
+        group: 'Title',
+        items: [
+            { value: 'title-asc', label: 'Title A - Z' },
+            { value: 'title-desc', label: 'Title Z - A' },
+        ],
+    },
+    {
+        group: 'Engagement',
+        items: [
+            { value: 'views-desc', label: 'Most views' },
+            { value: 'views-asc', label: 'Fewest views' },
+            { value: 'likes-desc', label: 'Most likes' },
+        ],
+    },
+    {
+        group: 'Content',
+        items: [
+            { value: 'images-desc', label: 'Most images' },
+            { value: 'images-asc', label: 'Without images first' },
+            { value: 'status', label: 'Status' },
+        ],
+    },
+];
+
+const STATUS_ORDER: Record<string, number> = {
+    published: 0,
+    draft: 1,
+    archived: 2,
+};
+
+const timestamp = (value: string | null) => {
+    const time = value ? new Date(value).getTime() : 0;
+
+    // Een ongeldige datum geeft NaN, en NaN-vergelijkingen maken de volgorde
+    // onvoorspelbaar. Die posts horen achteraan.
+    return Number.isNaN(time) ? 0 : time;
+};
 
 export default function Dashboard() {
     const [posts, setPosts] = useState<Post[]>([]);
@@ -143,20 +198,30 @@ export default function Dashboard() {
     const [sortQuery, setSortQuery] = useState('');
     const [statusQuery, setStatusQuery] = useState('');
 
+    const imageCount = (post: Post) => imagesByPostId[post.id]?.length ?? 0;
+
+    const comparators: Record<string, (a: Post, b: Post) => number> = {
+        'date-desc': (a, b) => timestamp(b.created_at) - timestamp(a.created_at),
+        'date-asc': (a, b) => timestamp(a.created_at) - timestamp(b.created_at),
+        'title-asc': (a, b) => a.title.localeCompare(b.title),
+        'title-desc': (a, b) => b.title.localeCompare(a.title),
+        'views-desc': (a, b) => (b.views ?? 0) - (a.views ?? 0),
+        'views-asc': (a, b) => (a.views ?? 0) - (b.views ?? 0),
+        'likes-desc': (a, b) => (b.likes ?? 0) - (a.likes ?? 0),
+        'images-desc': (a, b) => imageCount(b) - imageCount(a),
+        'images-asc': (a, b) => imageCount(a) - imageCount(b),
+        status: (a, b) =>
+            (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99),
+    };
+
     const filteredPosts = [...posts]
         .sort((a, b) => {
-            if (sortQuery === 'Date') {
-                return (
-                    new Date(b.created_at || '').getTime() -
-                    new Date(a.created_at || '').getTime()
-                );
-            }
+            const compare = comparators[sortQuery];
+            // Gelijke waarden krijgen altijd dezelfde volgorde: zonder deze
+            // tiebreaker wisselen rijen van plek bij elke herlaadbeurt.
+            const result = compare ? compare(a, b) : 0;
 
-            if (sortQuery === 'Alphabet') {
-                return a.title.localeCompare(b.title);
-            }
-
-            return 0;
+            return result !== 0 ? result : b.id - a.id;
         })
         .filter((post) => {
             const matchesSearch = post.title
@@ -181,8 +246,8 @@ export default function Dashboard() {
         currentPage * pageSize,
     );
 
-    const handleSortChange = (value: string[]) => {
-        setSortQuery(value[0] || '');
+    const handleSortChange = (value: string | null) => {
+        setSortQuery(value ?? '');
         setActivePage(1);
     };
 
@@ -477,12 +542,14 @@ export default function Dashboard() {
                                 />
                             </div>
                             <div className="flex w-full flex-row lg:w-auto">
-                                <MultiSelect
+                                <Select
                                     className="w-full"
-                                    placeholder="Sort"
-                                    data={['Date', 'Alphabet', 'Views']}
-                                    value={sortQuery ? [sortQuery] : []}
+                                    placeholder="Sort by"
+                                    data={SORT_OPTIONS}
+                                    value={sortQuery || null}
                                     onChange={handleSortChange}
+                                    clearable
+                                    comboboxProps={{ width: 220 }}
                                 />
                             </div>
                         </div>
